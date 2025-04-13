@@ -1,0 +1,50 @@
+<!-- Task Detail Modal -->
+<div class="modal fade" id="taskModal" tabindex="-1" aria-labelledby="taskModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="taskDetailForm">
+        <div class="modal-header">
+          <h5 class="modal-title" id="taskModalLabel">Task Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="taskId">
+          <div class="mb-3">
+            <label for="taskTitle" class="form-label">Title</label>
+            <input type="text" class="form-control" id="taskTitle" required>
+          </div>
+          <div class="mb-3">
+            <label for="taskDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="taskDescription" rows="3"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="taskStatus" class="form-label">Status</label>
+            <select class="form-select" id="taskStatus">
+              <option value="todo">To Do</option>
+              <option value="inprogress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="dueDate" class="form-label">Due Date</label>
+            <input type="date" class="form-control" id="dueDate">
+          </div>
+          <div class="mb-3">
+            <label for="taskAttachment" class="form-label">Attachment</label>
+            <input type="file" class="form-control" id="taskAttachment">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Comments</label>
+            <ul class="list-group mb-2" id="commentList"></ul>
+            <input type="text" class="form-control" id="newComment" placeholder="Add a comment">
+            <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="addComment()">Add Comment</button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" onclick="deleteTask()">Delete</button>
+          <button type="submit" class="btn btn-success">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

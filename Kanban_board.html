@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CollabSync | Project Board</title>
+  <link rel="stylesheet" href="styles/css/main.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <h4 id="projectTitle">Project Board</h4>
+    <button class="btn btn-secondary" onclick="goBack()">Back to Dashboard</button>
+  </div>
+
+  <div class="kanban-board" id="kanbanBoard">
+    <div class="kanban-column" id="todo" ondrop="drop(event)" ondragover="allowDrop(event)">
+      <h5>To Do</h5>
+      <div class="add-task-input">
+        <input type="text" class="form-control mb-2" id="newTaskInput" placeholder="Enter new task">
+        <button class="btn btn-sm btn-success w-100" onclick="addNewTask()">Add Task</button>
+      </div>
+    </div>
+    <div class="kanban-column" id="inprogress" ondrop="drop(event)" ondragover="allowDrop(event)">
+      <h5>In Progress</h5>
+    </div>
+    <div class="kanban-column" id="done" ondrop="drop(event)" ondragover="allowDrop(event)">
+      <h5>Done</h5>
+    </div>
+  </div>
+
+  <script>
+    let taskCounter = 6;
+
+    const dummyTasks = [
+      { id: 't1', title: "Setup repo", status: "todo" },
+      { id: 't2', title: "Design UI wireframes", status: "todo" },
+      { id: 't3', title: "Build login page", status: "inprogress" },
+      { id: 't4', title: "Create user model", status: "inprogress" },
+      { id: 't5', title: "Write readme", status: "done" }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const board = {
+        todo: document.getElementById('todo'),
+        inprogress: document.getElementById('inprogress'),
+        done: document.getElementById('done')
+      };
+
+      dummyTasks.forEach(task => {
+        const card = createTaskCard(task.id, task.title);
+        board[task.status].appendChild(card);
+      });
+    });
+
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function drag(ev) {
+      ev.dataTransfer.setData("text", ev.target.id);
+    }
+
+    function drop(ev) {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData("text");
+      const card = document.getElementById(data);
+      ev.currentTarget.appendChild(card);
+    }
+
+    function createTaskCard(id, title) {
+      const card = document.createElement('div');
+      card.className = 'task-card';
+      card.textContent = title;
+      card.id = id;
+      card.draggable = true;
+      card.ondragstart = drag;
+      return card;
+    }
+
+    function addNewTask() {
+      const input = document.getElementById('newTaskInput');
+      const title = input.value.trim();
+      if (title !== '') {
+        const id = 't' + taskCounter++;
+        const card = createTaskCard(id, title);
+        document.getElementById('todo').appendChild(card);
+        input.value = '';
+      } else {
+        alert("Please enter a task name.");
+      }
+    }
+
+    function goBack() {
+      window.location.href = 'Dashboard.html';
+    }
+  </script>
+
+</body>
+</html>

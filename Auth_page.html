@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CollabSync | Login</title>
+  <link rel="stylesheet" href="styles/css/main.css">
+</head>
+<body>
+
+  <div class="auth-container">
+    <div class="logo">🔒</div>
+    <h2>Login</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input type="email" class="form-control" id="email" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" id="password" required>
+      </div>
+      <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="rememberMe">
+        <label class="form-check-label" for="rememberMe">Remember me</label>
+      </div>
+      <button type="submit" class="btn btn-primary">Login</button>
+      <div class="text-center mt-3">
+        <a href="#">Forgot password?</a> | <a href="index.html">Sign up</a>
+      </div>
+    </form>
+  </div>
+
+  <script src="scripts/login.js"></script>
+
+  <script>
+    // Handle login form submission
+    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+      e.preventDefault();  // Prevent default form submission
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+
+      try {
+        const response = await fetch("https://your-backend-url.onrender.com/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Save the JWT token in localStorage or sessionStorage based on rememberMe
+          if (rememberMe) {
+            localStorage.setItem("token", data.token);  // Store in localStorage if "Remember me" is checked
+          } else {
+            sessionStorage.setItem("token", data.token);  // Store in sessionStorage if not
+          }
+
+          // Redirect user to the dashboard or home page
+          window.location.href = "Dashboard.html";  // Change this if needed to a specific route
+        } else {
+          alert(data.message || "Login failed. Please check your credentials.");
+        }
+      } catch (err) {
+        alert('An error occurred. Please try again later.');
+        console.error(err);
+      }
+    });
+  </script>
+
+</body>
+</html>

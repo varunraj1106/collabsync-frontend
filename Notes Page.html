@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CollabSync | Notes</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body {
+      background-color: #f5f7fa;
+    }
+    .note-card {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 0 5px rgba(0,0,0,0.05);
+      margin-bottom: 1rem;
+      cursor: pointer;
+    }
+    #noteEditor {
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+      min-height: 200px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3>Your Notes</h3>
+      <button class="btn btn-primary" onclick="newNote()">+ New Note</button>
+    </div>
+
+    <!-- Notes List -->
+    <div id="notesList"></div>
+
+    <!-- Note Editor -->
+    <div class="mt-4">
+      <h5 id="noteEditorTitle">New Note</h5>
+      <input type="text" class="form-control mb-2" id="noteTitle" placeholder="Enter note title" />
+      <select class="form-select mb-2" id="noteProject">
+        <option selected disabled>Link to project</option>
+        <option value="AI Chatbot">AI Chatbot</option>
+        <option value="Task Manager">Task Manager</option>
+        <option value="Portfolio Website">Portfolio Website</option>
+      </select>
+      <div contenteditable="true" id="noteEditor" class="mb-2"></div>
+      <button class="btn btn-success" onclick="saveNote()">Save Note</button>
+    </div>
+  </div>
+
+  <script>
+    let notes = [];
+
+    function renderNotes() {
+      const list = document.getElementById('notesList');
+      list.innerHTML = '';
+      notes.forEach((note, index) => {
+        const card = document.createElement('div');
+        card.className = 'note-card';
+        card.innerHTML = `
+          <h6>${note.title}</h6>
+          <p class="text-muted">${note.content.substring(0, 60)}...</p>
+        `;
+        card.onclick = () => editNote(index);
+        list.appendChild(card);
+      });
+    }
+
+    function newNote() {
+      document.getElementById('noteTitle').value = '';
+      document.getElementById('noteEditor').innerHTML = '';
+      document.getElementById('noteEditorTitle').textContent = 'New Note';
+    }
+
+    function editNote(index) {
+      const note = notes[index];
+      document.getElementById('noteTitle').value = note.title;
+      document.getElementById('noteEditor').innerHTML = note.content;
+      document.getElementById('noteEditorTitle').textContent = `Editing: ${note.title}`;
+    }
+
+    function saveNote() {
+      const title = document.getElementById('noteTitle').value.trim();
+      const content = document.getElementById('noteEditor').innerHTML.trim();
+      const project = document.getElementById('noteProject').value;
+
+      if (!title || !content) {
+        alert("Please enter a title and content.");
+        return;
+      }
+
+      const existing = notes.find(n => n.title === title);
+      if (existing) {
+        existing.content = content;
+        existing.project = project;
+      } else {
+        notes.push({ title, content, project });
+      }
+
+      renderNotes();
+      alert("Note saved!");
+    }
+
+    // Optional: Autosave every 10 seconds
+    setInterval(() => {
+      const title = document.getElementById('noteTitle').value;
+      const content = document.getElementById('noteEditor').innerHTML;
+      if (title && content) {
+        console.log("Autosaving...");
+        saveNote();
+      }
+    }, 10000); // 10s
+
+    // Initialize with sample notes
+    document.addEventListener('DOMContentLoaded', () => {
+      notes = [
+        { title: "Meeting Notes", content: "Discussed backend routes & models", project: "Task Manager" },
+        { title: "Frontend Plan", content: "Homepage wireframe + login UI", project: "Portfolio Website" }
+      ];
+      renderNotes();
+    });
+  </script>
+</body>
+</html>
