@@ -31,7 +31,6 @@
 
   <!-- Main Container -->
   <div class="container mt-4">
-    <!-- Stats -->
     <div class="row mb-4">
       <div class="col-md-6">
         <div class="stats-box text-center">
@@ -47,32 +46,25 @@
       </div>
     </div>
 
-    <!-- Links to Other Pages -->
     <h4>Your Projects</h4>
     <div id="projectsContainer">
-      <!-- Cards will load here -->
       <a href="Kanban_board.html" class="btn btn-outline-secondary">Go to Kanban Board</a>
       <a href="team%20progress.html" class="btn btn-outline-secondary">Go to Team Progress</a>
       <a href="Notes%20Page.html" class="btn btn-outline-secondary">Go to Notes</a>
     </div>
-
   </div>
 
   <script>
-    // Load user data and fake projects on page load
     document.addEventListener('DOMContentLoaded', () => {
-      // ✅ Show username from localStorage
       const storedName = localStorage.getItem('username') || 'User';
       document.getElementById('username').textContent = storedName;
 
-      // ✅ Dummy project data
       const dummyProjects = [
         { name: "AI Chatbot", description: "NLP chatbot with node.js", _id: "1" },
         { name: "Task Manager", description: "Full-stack Kanban app", _id: "2" },
         { name: "Portfolio Website", description: "Responsive site in HTML/CSS", _id: "3" }
       ];
 
-      // ✅ Render project cards
       const container = document.getElementById('projectsContainer');
       dummyProjects.forEach(project => {
         const card = document.createElement('div');
@@ -91,8 +83,8 @@
     }
 
     function logout() {
-      localStorage.removeItem('username'); // ✅ Clear stored name
-      localStorage.removeItem('token');    // If token used later
+      localStorage.removeItem('username');
+      localStorage.removeItem('token');  // If token is used later
       window.location.href = 'login.html';
     }
   </script>
