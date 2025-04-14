@@ -29,10 +29,15 @@
   <script>
     const API_URL = 'https://collabsync-backend-i376.onrender.com/api/tasks';
 
+    // Load tasks from MongoDB on page load
     document.addEventListener('DOMContentLoaded', async () => {
-      const response = await fetch(API_URL);
-      const tasks = await response.json();
-      tasks.forEach(task => renderTask(task));
+      try {
+        const response = await fetch(API_URL);
+        const tasks = await response.json();
+        tasks.forEach(task => renderTask(task));
+      } catch (error) {
+        console.error('Failed to load tasks:', error);
+      }
     });
 
     function allowDrop(ev) {
@@ -49,12 +54,16 @@
       const card = document.getElementById(taskId);
       ev.currentTarget.appendChild(card);
 
-      // Update in DB
-      await fetch(`${API_URL}/${taskId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
+      // Update status in DB
+      try {
+        await fetch(`${API_URL}/${taskId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+      } catch (err) {
+        console.error("Failed to update task status", err);
+      }
     }
 
     async function addNewTask() {
@@ -62,14 +71,20 @@
       const title = input.value.trim();
       if (!title) return alert("Enter a task name");
 
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title })
-      });
-      const task = await response.json();
-      renderTask(task);
-      input.value = '';
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, status: 'todo' }) // ✅ Send status!
+        });
+
+        const task = await response.json();
+        renderTask(task);
+        input.value = '';
+      } catch (err) {
+        console.error("Failed to create task", err);
+        alert("Something went wrong while creating task.");
+      }
     }
 
     function renderTask(task) {
@@ -81,7 +96,7 @@
       card.ondragstart = drag;
 
       const column = document.getElementById(task.status);
-      column.appendChild(card);
+      if (column) column.appendChild(card);
     }
 
     function goBack() {
