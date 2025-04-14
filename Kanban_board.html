@@ -1,56 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CollabSync | Project Board</title>
-  <link rel="stylesheet" href="styles/css/main.css">
+  <link rel="stylesheet" href="styles/css/main.css" />
 </head>
 <body>
-
   <div class="top-bar">
-    <h4 id="projectTitle">Project Board</h4>
+    <h4>Project Board</h4>
     <button class="btn btn-secondary" onclick="goBack()">Back to Dashboard</button>
   </div>
 
   <div class="kanban-board" id="kanbanBoard">
-    <div class="kanban-column" id="todo" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="kanban-column" id="todo" ondrop="drop(event, 'todo')" ondragover="allowDrop(event)">
       <h5>To Do</h5>
-      <div class="add-task-input">
-        <input type="text" class="form-control mb-2" id="newTaskInput" placeholder="Enter new task">
-        <button class="btn btn-sm btn-success w-100" onclick="addNewTask()">Add Task</button>
-      </div>
+      <input type="text" id="newTaskInput" placeholder="Enter new task" />
+      <button onclick="addNewTask()">Add Task</button>
     </div>
-    <div class="kanban-column" id="inprogress" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="kanban-column" id="inprogress" ondrop="drop(event, 'inprogress')" ondragover="allowDrop(event)">
       <h5>In Progress</h5>
     </div>
-    <div class="kanban-column" id="done" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <div class="kanban-column" id="done" ondrop="drop(event, 'done')" ondragover="allowDrop(event)">
       <h5>Done</h5>
     </div>
   </div>
 
   <script>
-    let taskCounter = 6;
+    const API_URL = 'https://collabsync-backend-i376.onrender.com/api/tasks';
 
-    const dummyTasks = [
-      { id: 't1', title: "Setup repo", status: "todo" },
-      { id: 't2', title: "Design UI wireframes", status: "todo" },
-      { id: 't3', title: "Build login page", status: "inprogress" },
-      { id: 't4', title: "Create user model", status: "inprogress" },
-      { id: 't5', title: "Write readme", status: "done" }
-    ];
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const board = {
-        todo: document.getElementById('todo'),
-        inprogress: document.getElementById('inprogress'),
-        done: document.getElementById('done')
-      };
-
-      dummyTasks.forEach(task => {
-        const card = createTaskCard(task.id, task.title);
-        board[task.status].appendChild(card);
-      });
+    document.addEventListener('DOMContentLoaded', async () => {
+      const response = await fetch(API_URL);
+      const tasks = await response.json();
+      tasks.forEach(task => renderTask(task));
     });
 
     function allowDrop(ev) {
@@ -61,40 +43,50 @@
       ev.dataTransfer.setData("text", ev.target.id);
     }
 
-    function drop(ev) {
+    async function drop(ev, newStatus) {
       ev.preventDefault();
-      const data = ev.dataTransfer.getData("text");
-      const card = document.getElementById(data);
+      const taskId = ev.dataTransfer.getData("text");
+      const card = document.getElementById(taskId);
       ev.currentTarget.appendChild(card);
+
+      // Update in DB
+      await fetch(`${API_URL}/${taskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
     }
 
-    function createTaskCard(id, title) {
-      const card = document.createElement('div');
-      card.className = 'task-card';
-      card.textContent = title;
-      card.id = id;
-      card.draggable = true;
-      card.ondragstart = drag;
-      return card;
-    }
-
-    function addNewTask() {
+    async function addNewTask() {
       const input = document.getElementById('newTaskInput');
       const title = input.value.trim();
-      if (title !== '') {
-        const id = 't' + taskCounter++;
-        const card = createTaskCard(id, title);
-        document.getElementById('todo').appendChild(card);
-        input.value = '';
-      } else {
-        alert("Please enter a task name.");
-      }
+      if (!title) return alert("Enter a task name");
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title })
+      });
+      const task = await response.json();
+      renderTask(task);
+      input.value = '';
+    }
+
+    function renderTask(task) {
+      const card = document.createElement('div');
+      card.className = 'task-card';
+      card.textContent = task.title;
+      card.id = task._id;
+      card.draggable = true;
+      card.ondragstart = drag;
+
+      const column = document.getElementById(task.status);
+      column.appendChild(card);
     }
 
     function goBack() {
       window.location.href = 'Dashboard.html';
     }
   </script>
-
 </body>
 </html>
