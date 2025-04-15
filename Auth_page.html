@@ -26,7 +26,7 @@
       </div>
       <button type="submit" class="btn btn-primary">Login</button>
       <div class="text-center mt-3">
-        <a href="#">Forgot password?</a> | <a href="index.html">Sign up</a>
+        <a href="#">Forgot password?</a> | <a href="/index.html">Sign up</a>
       </div>
     </form>
   </div>
@@ -62,12 +62,13 @@
             sessionStorage.setItem("userId", userId);
           }
 
-          // Redirect based on role
+          // ✅ Use absolute path to fix 404 issue
           if (userId.startsWith("MM")) {
-            window.location.href = "manager_dashboard.html";
+            window.location.href = "/manager_dashboard.html";
           } else {
-            window.location.href = "Dashboard.html";
+            window.location.href = "/Dashboard.html";
           }
+
         } else {
           alert(data.message || "Login failed. Please check your credentials.");
         }
