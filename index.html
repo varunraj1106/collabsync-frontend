@@ -69,7 +69,13 @@
 
         if (response.ok) {
           localStorage.setItem('username', name);
-          window.location.href = 'Dashboard.html';
+
+          // Redirect based on employee ID prefix
+          if (emp_id.startsWith("MM")) {
+            window.location.href = "manager_dashboard.html";
+          } else {
+            window.location.href = "Dashboard.html";
+          }
         } else {
           alert(data || 'Error occurred while registering.');
         }
