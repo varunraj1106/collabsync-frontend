@@ -71,11 +71,18 @@
       const title = input.value.trim();
       if (!title) return alert("Enter a task name");
 
+      const userId = localStorage.getItem('userId'); // ✅ get userId from localStorage
+      if (!userId) return alert("User ID not found. Please login again.");
+
       try {
         const response = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, status: 'todo' }) // ✅ Send status!
+          body: JSON.stringify({
+            title,
+            status: 'todo',
+            userId // ✅ send userId to associate task
+          })
         });
 
         const task = await response.json();
