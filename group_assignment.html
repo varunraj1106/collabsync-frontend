@@ -6,7 +6,6 @@
   <title>Group Assignment | CollabSync</title>
   <link rel="stylesheet" href="styles/css/managerdash1.css">
   <style>
-    /* Modal Styles */
     .modal {
       display: none;
       position: fixed;
@@ -34,7 +33,7 @@
       margin-bottom: 15px;
     }
 
-    .modal-content input {
+    .modal-content input, .modal-content select {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
@@ -87,42 +86,67 @@
     <div class="modal-content">
       <h3>Create a New Group</h3>
       <input type="text" id="groupName" placeholder="Group Name" />
-      <input type="text" id="groupMembers" placeholder="Group Members (comma-separated IDs)" />
+      <select id="groupMembers" multiple></select>
       <button class="save-btn" onclick="saveGroup()">Save</button>
       <button class="cancel-btn" onclick="closeModal()">Cancel</button>
     </div>
   </div>
 
   <script>
+    const managerId = localStorage.getItem("userId");
+
     function openModal() {
       document.getElementById("groupModal").style.display = "block";
+      loadAssignedEmployees();
     }
 
     function closeModal() {
       document.getElementById("groupModal").style.display = "none";
       document.getElementById("groupName").value = "";
-      document.getElementById("groupMembers").value = "";
+      document.getElementById("groupMembers").innerHTML = "";
+    }
+
+    async function loadAssignedEmployees() {
+      const select = document.getElementById("groupMembers");
+      select.innerHTML = "<option disabled>Loading...</option>";
+
+      try {
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`);
+        const data = await res.json();
+
+        if (!res.ok || !Array.isArray(data)) throw new Error("Failed to load assigned employees");
+
+        select.innerHTML = "";
+        data.forEach(emp => {
+          const option = document.createElement("option");
+          option.value = emp._id;
+          option.text = `${emp.name} (${emp._id})`;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        console.error("❌ Error loading assigned employees:", err);
+        select.innerHTML = "<option disabled>Error loading employees</option>";
+      }
     }
 
     function saveGroup() {
       const name = document.getElementById("groupName").value.trim();
-      const members = document.getElementById("groupMembers").value.trim();
+      const memberSelect = document.getElementById("groupMembers");
+      const selectedOptions = Array.from(memberSelect.selectedOptions).map(opt => opt.text);
 
-      if (!name || !members) {
+      if (!name || selectedOptions.length === 0) {
         alert("Please fill in both fields.");
         return;
       }
 
-      // Simulate saving the group (replace with API call later)
       const container = document.getElementById("groupContainer");
       const card = document.createElement("div");
       card.className = "employee-card";
       card.innerHTML = `
         <h4>${name}</h4>
-        <p>Members: ${members}</p>
+        <p>Members: ${selectedOptions.join(", ")}</p>
       `;
       container.appendChild(card);
-
       closeModal();
     }
 
