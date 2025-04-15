@@ -98,7 +98,7 @@
 
     async function assignEmployee(empId, button) {
       const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assign`, {
-        method: "POST",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ empId, managerId })
       });
@@ -110,7 +110,7 @@
         button.classList.remove("btn-primary");
         button.classList.add("btn-success");
 
-        // Optional: remove from list
+        // Optionally remove card from view
         button.closest(".col-md-4").remove();
       } else {
         alert(result.message || "❌ Assignment failed.");
