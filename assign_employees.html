@@ -14,7 +14,7 @@
   <nav class="navbar navbar-dark bg-dark px-4">
     <span class="navbar-brand mb-0 h1">CollabSync</span>
     <div>
-      <a href="assigned_employees.html" class="btn btn-outline-light me-2">View Assigned</a>
+      <a href="viewassigned.html" class="btn btn-outline-light me-2">View Assigned</a>
       <button class="btn btn-danger" onclick="logout()">Logout</button>
     </div>
   </nav>
@@ -110,7 +110,7 @@
         button.classList.remove("btn-primary");
         button.classList.add("btn-success");
 
-        // Optionally remove card from view
+        // Optional: remove from list
         button.closest(".col-md-4").remove();
       } else {
         alert(result.message || "❌ Assignment failed.");
