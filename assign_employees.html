@@ -1,0 +1,100 @@
+<!-- File: assign_employees.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Assign Employees | CollabSync</title>
+  <link rel="stylesheet" href="styles/css/dash.css">
+</head>
+<body>
+  <nav class="navbar">
+    <span class="navbar-brand">CollabSync</span>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </nav>
+
+  <div class="container">
+    <h2>Assign Employees</h2>
+
+    <div class="filters">
+      <input type="text" id="filterId" placeholder="Filter by Employee ID" />
+      <input type="text" id="filterName" placeholder="Filter by Name" />
+      <select id="filterDept">
+        <option value="">All Departments</option>
+        <option value="HR">HR</option>
+        <option value="Finance">Finance</option>
+        <option value="IT">IT</option>
+        <option value="Marketing">Marketing</option>
+        <option value="Operations">Operations</option>
+        <option value="Sales">Sales</option>
+        <option value="Legal">Legal</option>
+        <option value="Customer Support">Customer Support</option>
+      </select>
+    </div>
+
+    <div id="employeeContainer" class="employee-grid">
+      <!-- Cards inserted here -->
+    </div>
+  </div>
+
+  <script>
+    const managerId = localStorage.getItem("userId");
+
+    document.addEventListener("DOMContentLoaded", fetchEmployees);
+    document.getElementById("filterId").addEventListener("input", fetchEmployees);
+    document.getElementById("filterName").addEventListener("input", fetchEmployees);
+    document.getElementById("filterDept").addEventListener("change", fetchEmployees);
+
+    async function fetchEmployees() {
+      const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/available/${managerId}`);
+      const all = await res.json();
+      const container = document.getElementById("employeeContainer");
+      container.innerHTML = "";
+
+      const idFilter = document.getElementById("filterId").value.toLowerCase();
+      const nameFilter = document.getElementById("filterName").value.toLowerCase();
+      const deptFilter = document.getElementById("filterDept").value;
+
+      const filtered = all.filter(emp =>
+        emp._id.toLowerCase().includes(idFilter) &&
+        emp.name.toLowerCase().includes(nameFilter) &&
+        (deptFilter === "" || emp.branch === deptFilter)
+      );
+
+      filtered.forEach(emp => {
+        const card = document.createElement("div");
+        card.className = "employee-card";
+        card.innerHTML = `
+          <h4>${emp.name}</h4>
+          <p>ID: ${emp._id}</p>
+          <p>Dept: ${emp.branch}</p>
+          <p>Email: ${emp.email}</p>
+          <button onclick="assignEmployee('${emp._id}')">Assign</button>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    async function assignEmployee(empId) {
+      const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ empId, managerId })
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        alert("Assigned successfully!");
+        fetchEmployees();
+      } else {
+        alert(result.message || "Assignment failed.");
+      }
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "Auth_page.html";
+    }
+  </script>
+</body>
+</html>
