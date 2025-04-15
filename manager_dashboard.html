@@ -60,7 +60,10 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       const res = await fetch("https://collabsync-backend-i376.onrender.com/api/users/all");
-      allEmployees = await res.json();
+      let employees = await res.json();
+
+      // ✅ FIX: Remove manager from the list
+      allEmployees = employees.filter(emp => emp._id !== managerId);
       renderEmployees(allEmployees);
 
       document.getElementById("filterId").addEventListener("input", applyFilters);
