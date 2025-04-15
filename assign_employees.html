@@ -52,7 +52,7 @@
     document.getElementById("filterDept").addEventListener("change", fetchEmployees);
 
     async function fetchEmployees() {
-      const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/unassigned`);
+      const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/available/${managerId}`)
       const all = await res.json();
       const container = document.getElementById("employeeContainer");
       container.innerHTML = "";
@@ -82,7 +82,8 @@
     }
 
     async function assignEmployee(empId, button) {
-      const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assign-manager`, {
+      const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/available/${managerId}`)
+ {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ employeeId: empId, managerId })
