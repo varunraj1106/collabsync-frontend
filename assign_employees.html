@@ -13,7 +13,7 @@
   <nav class="navbar">
     <span class="navbar-brand">CollabSync</span>
     <div>
-      <a href="assigned_employees.html" class="btn btn-outline-light me-2">View Assigned</a> <!-- ✅ NEW BUTTON -->
+      <a href="assigned_employees.html" class="btn btn-outline-light me-2">View Assigned</a>
       <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
   </nav>
@@ -52,52 +52,58 @@
     document.getElementById("filterDept").addEventListener("change", fetchEmployees);
 
     async function fetchEmployees() {
-      const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/available/${managerId}`)
-      const all = await res.json();
-      const container = document.getElementById("employeeContainer");
-      container.innerHTML = "";
+      try {
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/available/${managerId}`);
+        const all = await res.json();
+        const container = document.getElementById("employeeContainer");
+        container.innerHTML = "";
 
-      const idFilter = document.getElementById("filterId").value.toLowerCase();
-      const nameFilter = document.getElementById("filterName").value.toLowerCase();
-      const deptFilter = document.getElementById("filterDept").value;
+        const idFilter = document.getElementById("filterId").value.toLowerCase();
+        const nameFilter = document.getElementById("filterName").value.toLowerCase();
+        const deptFilter = document.getElementById("filterDept").value;
 
-      const filtered = all.filter(emp =>
-        emp._id.toLowerCase().includes(idFilter) &&
-        emp.name.toLowerCase().includes(nameFilter) &&
-        (deptFilter === "" || emp.branch === deptFilter)
-      );
+        const filtered = all.filter(emp =>
+          emp._id.toLowerCase().includes(idFilter) &&
+          emp.name.toLowerCase().includes(nameFilter) &&
+          (deptFilter === "" || emp.branch === deptFilter)
+        );
 
-      filtered.forEach(emp => {
-        const card = document.createElement("div");
-        card.className = "employee-card";
-        card.innerHTML = `
-          <h4>${emp.name}</h4>
-          <p>ID: ${emp._id}</p>
-          <p>Dept: ${emp.branch}</p>
-          <p>Email: ${emp.email}</p>
-          <button onclick="assignEmployee('${emp._id}', this)">Assign</button>
-        `;
-        container.appendChild(card);
-      });
+        filtered.forEach(emp => {
+          const card = document.createElement("div");
+          card.className = "employee-card";
+          card.innerHTML = `
+            <h4>${emp.name}</h4>
+            <p>ID: ${emp._id}</p>
+            <p>Dept: ${emp.branch}</p>
+            <p>Email: ${emp.email}</p>
+            <button onclick="assignEmployee('${emp._id}', this)">Assign</button>
+          `;
+          container.appendChild(card);
+        });
+      } catch (err) {
+        console.error("❌ Error fetching employees:", err);
+      }
     }
 
     async function assignEmployee(empId, button) {
-      const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/available/${managerId}`)
- {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId: empId, managerId })
-      });
+      try {
+        const res = await fetch("https://collabsync-backend-i376.onrender.com/api/users/assign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ empId, managerId })
+        });
 
-      const result = await res.json();
-      if (res.ok) {
-        button.innerText = "Assigned";
-        button.disabled = true;
-
-        // Optional: Remove card from list after assigning
-        button.parentElement.remove();
-      } else {
-        alert(result.message || "❌ Assignment failed.");
+        const result = await res.json();
+        if (res.ok) {
+          button.innerText = "Assigned";
+          button.disabled = true;
+          button.parentElement.remove(); // Optional: remove card after assignment
+        } else {
+          alert(result.message || "❌ Assignment failed.");
+        }
+      } catch (err) {
+        console.error("❌ Assignment error:", err);
+        alert("❌ Something went wrong while assigning.");
       }
     }
 
