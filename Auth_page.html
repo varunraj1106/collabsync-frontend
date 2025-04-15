@@ -31,12 +31,10 @@
     </form>
   </div>
 
-  <script src="scripts/login.js"></script>
-
   <script>
     // Handle login form submission
     document.getElementById("loginForm").addEventListener("submit", async function(e) {
-      e.preventDefault();  // Prevent default form submission
+      e.preventDefault();
 
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
@@ -54,15 +52,17 @@
         const data = await response.json();
 
         if (response.ok) {
-          // Save the JWT token in localStorage or sessionStorage based on rememberMe
+          // ✅ Save both token and userId
           if (rememberMe) {
-            localStorage.setItem("token", data.token);  // Store in localStorage if "Remember me" is checked
+            localStorage.setItem("token", data.token);
+            localStorage.setItem("userId", data.user._id);
           } else {
-            sessionStorage.setItem("token", data.token);  // Store in sessionStorage if not
+            sessionStorage.setItem("token", data.token);
+            sessionStorage.setItem("userId", data.user._id);
           }
 
-          // Redirect user to the dashboard or home page
-          window.location.href = "Dashboard.html";  // Change this if needed to a specific route
+          // ✅ Redirect after login
+          window.location.href = "Dashboard.html";
         } else {
           alert(data.message || "Login failed. Please check your credentials.");
         }
