@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Group Assignment | CollabSync</title>
+  <link rel="stylesheet" href="styles/css/managerdash1.css">
+  <style>
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .modal-content h3 {
+      margin-bottom: 15px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .modal-content button {
+      padding: 10px 16px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .save-btn {
+      background-color: #27ae60;
+      color: white;
+    }
+
+    .cancel-btn {
+      background-color: #e74c3c;
+      color: white;
+      float: right;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <span class="navbar-brand">CollabSync</span>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </nav>
+
+  <div class="container">
+    <h2>Group Assignment</h2>
+    <button class="save-btn" onclick="openModal()">+ Create Group</button>
+
+    <div id="groupContainer" class="employee-grid">
+      <!-- Group cards will go here -->
+    </div>
+  </div>
+
+  <!-- Create Group Modal -->
+  <div id="groupModal" class="modal">
+    <div class="modal-content">
+      <h3>Create a New Group</h3>
+      <input type="text" id="groupName" placeholder="Group Name" />
+      <input type="text" id="groupMembers" placeholder="Group Members (comma-separated IDs)" />
+      <button class="save-btn" onclick="saveGroup()">Save</button>
+      <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    function openModal() {
+      document.getElementById("groupModal").style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById("groupModal").style.display = "none";
+      document.getElementById("groupName").value = "";
+      document.getElementById("groupMembers").value = "";
+    }
+
+    function saveGroup() {
+      const name = document.getElementById("groupName").value.trim();
+      const members = document.getElementById("groupMembers").value.trim();
+
+      if (!name || !members) {
+        alert("Please fill in both fields.");
+        return;
+      }
+
+      // Simulate saving the group (replace with API call later)
+      const container = document.getElementById("groupContainer");
+      const card = document.createElement("div");
+      card.className = "employee-card";
+      card.innerHTML = `
+        <h4>${name}</h4>
+        <p>Members: ${members}</p>
+      `;
+      container.appendChild(card);
+
+      closeModal();
+    }
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "Auth_page.html";
+    }
+  </script>
+</body>
+</html>
