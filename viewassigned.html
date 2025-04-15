@@ -27,83 +27,68 @@
   </div>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const managerId = localStorage.getItem("userId");
+    const managerId = localStorage.getItem("userId");
 
-      if (!managerId) {
-        alert("Session expired. Please log in again.");
-        window.location.href = "Auth_page.html";
-        return;
-      }
-
+    document.addEventListener("DOMContentLoaded", async () => {
       const container = document.getElementById("assignedContainer");
       const placeholder = document.getElementById("noAssigned");
 
-      fetchAssigned();
+      try {
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`);
+        const employees = await res.json();
 
-      async function fetchAssigned() {
-        try {
-          const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`);
-          const employees = await res.json();
+        container.innerHTML = "";
 
-          container.innerHTML = "";
-
-          if (employees.length === 0) {
-            placeholder.innerText = "No employees assigned yet.";
-            return;
-          }
-
-          employees.forEach(emp => {
-            const col = document.createElement("div");
-            col.className = "col-md-4";
-
-            const card = document.createElement("div");
-            card.className = "card shadow-sm p-3 h-100";
-            card.innerHTML = `
-              <h5 class="fw-bold">${emp.name}</h5>
-              <p class="mb-1"><strong>ID:</strong> ${emp._id}</p>
-              <p class="mb-1"><strong>Dept:</strong> ${emp.branch}</p>
-              <p class="mb-2"><strong>Email:</strong> ${emp.email}</p>
-              <button class="btn btn-outline-danger w-100 mt-auto" onclick="unassignEmployee('${emp._id}', this)">Remove</button>
-            `;
-
-            col.appendChild(card);
-            container.appendChild(col);
-          });
-        } catch (err) {
-          console.error("❌ Error fetching assigned employees:", err);
-          placeholder.innerText = "❌ Error fetching assigned employees.";
+        if (employees.length === 0) {
+          placeholder.innerText = "No employees assigned yet.";
+          return;
         }
-      }
 
-      async function unassignEmployee(empId, button) {
-        const confirmRemoval = confirm("Are you sure you want to remove this employee?");
-        if (!confirmRemoval) return;
+        employees.forEach(emp => {
+          const col = document.createElement("div");
+          col.className = "col-md-4";
 
-        try {
-          const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/unassign`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ empId })
-          });
+          const card = document.createElement("div");
+          card.className = "card shadow-sm p-3 h-100";
+          card.innerHTML = `
+            <h5 class="fw-bold">${emp.name}</h5>
+            <p class="mb-1"><strong>ID:</strong> ${emp._id}</p>
+            <p class="mb-1"><strong>Dept:</strong> ${emp.branch}</p>
+            <p class="mb-2"><strong>Email:</strong> ${emp.email}</p>
+            <button class="btn btn-outline-danger w-100" onclick="unassignEmployee('${emp._id}', this)">Remove</button>
+          `;
 
-          const result = await res.json();
-          if (res.ok) {
-            button.closest(".col-md-4").remove();
-
-            // Optional: show message if all removed
-            if (document.querySelectorAll(".col-md-4").length === 0) {
-              container.innerHTML = `<p class="text-muted">No employees assigned yet.</p>`;
-            }
-          } else {
-            alert(result.message || "❌ Could not remove employee.");
-          }
-        } catch (err) {
-          console.error("❌ Error during unassigning:", err);
-          alert("❌ Network or server error.");
-        }
+          col.appendChild(card);
+          container.appendChild(col);
+        });
+      } catch (err) {
+        console.error("❌ Error fetching assigned employees:", err);
+        placeholder.innerText = "❌ Error fetching assigned employees.";
       }
     });
+
+    // ✅ Define unassignEmployee function
+    async function unassignEmployee(empId, button) {
+      const res = await fetch("https://collabsync-backend-i376.onrender.com/api/users/unassign", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ empId })
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        button.innerText = "Removed";
+        button.disabled = true;
+        button.classList.remove("btn-outline-danger");
+        button.classList.add("btn-success");
+
+        // Remove the card from the page
+        button.closest(".col-md-4").remove();
+      } else {
+        alert(result.message || "❌ Failed to remove employee.");
+      }
+    }
 
     function logout() {
       localStorage.clear();
