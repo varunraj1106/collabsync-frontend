@@ -1,0 +1,103 @@
+/* Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f5f7fa;
+  color: #333;
+  padding: 20px;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #2d3e50;
+  color: white;
+  padding: 15px 30px;
+  border-radius: 8px;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.logout-btn {
+  background-color: #e74c3c;
+  border: none;
+  padding: 10px 16px;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.logout-btn:hover {
+  background-color: #c0392b;
+}
+
+/* Container */
+.container {
+  margin-top: 30px;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.filters input,
+.filters select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  min-width: 200px;
+  font-size: 0.95rem;
+}
+
+/* Employee Grid */
+.employee-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+/* Employee Card */
+.employee-card {
+  background-color: white;
+  border: 1px solid #d1d1d1;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: transform 0.2s;
+}
+
+.employee-card:hover {
+  transform: translateY(-5px);
+}
+
+.employee-card h4 {
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+}
+
+.employee-card p {
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+/* Assign Button */
+.employee-card button {
+  background-color: #3498db;
+  border: none;
+}
