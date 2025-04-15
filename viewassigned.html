@@ -19,10 +19,12 @@
   </nav>
 
   <div class="container py-4">
-    <h2 class="mb-4">Employees Assigned Under You</h2>
+    <h2 class="mb-3">Employees Assigned Under You</h2>
+
+    <p id="noAssigned" class="text-muted">Loading...</p>
 
     <div id="assignedContainer" class="row g-3">
-      <p id="noAssigned" class="text-muted">Loading...</p>
+      <!-- Assigned employees will be rendered here -->
     </div>
   </div>
 
@@ -37,12 +39,17 @@
         const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`);
         const employees = await res.json();
 
-        container.innerHTML = "";
+        if (!res.ok) {
+          throw new Error("Failed to fetch assigned users");
+        }
 
         if (employees.length === 0) {
           placeholder.innerText = "No employees assigned yet.";
           return;
         }
+
+        // Hide the placeholder
+        placeholder.style.display = "none";
 
         employees.forEach(emp => {
           const col = document.createElement("div");
@@ -67,33 +74,38 @@
       }
     });
 
-    // ✅ Define unassignEmployee function
     async function unassignEmployee(empId, button) {
-      const res = await fetch("https://collabsync-backend-i376.onrender.com/api/users/unassign", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ empId })
-      });
+      try {
+        const res = await fetch("https://collabsync-backend-i376.onrender.com/api/users/unassign", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ empId })
+        });
 
-      const result = await res.json();
+        const result = await res.json();
 
-      if (res.ok) {
-        button.innerText = "Removed";
-        button.disabled = true;
-        button.classList.remove("btn-outline-danger");
-        button.classList.add("btn-success");
+        if (res.ok) {
+          button.innerText = "Removed";
+          button.disabled = true;
+          button.classList.remove("btn-outline-danger");
+          button.classList.add("btn-success");
 
-        // Remove the card from the page
-        button.closest(".col-md-4").remove();
-      } else {
-        alert(result.message || "❌ Failed to remove employee.");
+          button.closest(".col-md-4").remove();
+        } else {
+          alert(result.message || "❌ Failed to remove employee.");
+        }
+      } catch (err) {
+        console.error("❌ Error unassigning:", err);
+        alert("An error occurred while unassigning.");
       }
     }
 
     function logout() {
       localStorage.clear();
+      sessionStorage.clear();
       window.location.href = "Auth_page.html";
     }
   </script>
 </body>
 </html>
+
