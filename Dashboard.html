@@ -20,73 +20,96 @@
 </head>
 <body>
 
-  <!-- Top Bar -->
   <div class="top-bar">
     <h3>Welcome, <span id="username"></span></h3>
     <div>
-      <button class="btn btn-sm btn-outline-secondary me-2" onclick="createProject()">+ New Project</button>
+      <button class="btn btn-sm btn-outline-secondary me-2" onclick="createGroup()">+ Create Group</button>
       <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
     </div>
   </div>
 
-  <!-- Main Container -->
   <div class="container mt-4">
     <div class="row mb-4">
       <div class="col-md-6">
         <div class="stats-box text-center">
           <h5>Total Tasks</h5>
-          <p id="taskCount" class="fs-4">12</p>
+          <p id="taskCount" class="fs-4">0</p>
         </div>
       </div>
       <div class="col-md-6">
         <div class="stats-box text-center">
-          <h5>Deadlines Today</h5>
-          <p id="deadlinesToday" class="fs-4">2</p>
+          <h5>Total Groups</h5>
+          <p id="groupCount" class="fs-4">0</p>
         </div>
       </div>
     </div>
 
-    <h4>Your Projects</h4>
-    <div id="projectsContainer">
-      <a href="Kanban_board.html" class="btn btn-outline-secondary">Go to Kanban Board</a>
-      <a href="team%20progress.html" class="btn btn-outline-secondary">Go to Team Progress</a>
-      <a href="Notes%20Page.html" class="btn btn-outline-secondary">Go to Notes</a>
-    </div>
+    <h4>Your Project Groups</h4>
+    <div id="groupsContainer" class="row"></div>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const storedName = localStorage.getItem('username') || 'User';
-      document.getElementById('username').textContent = storedName;
+    const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+    document.getElementById('username').textContent = username || 'Manager';
 
-      const dummyProjects = [
-        { name: "AI Chatbot", description: "NLP chatbot with node.js", _id: "1" },
-        { name: "Task Manager", description: "Full-stack Kanban app", _id: "2" },
-        { name: "Portfolio Website", description: "Responsive site in HTML/CSS", _id: "3" }
-      ];
+    async function fetchGroups() {
+      try {
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups?managerId=${userId}`);
+        const data = await res.json();
 
-      const container = document.getElementById('projectsContainer');
-      dummyProjects.forEach(project => {
-        const card = document.createElement('div');
-        card.className = 'project-card';
-        card.innerHTML = `
-          <h5>${project.name}</h5>
-          <p>${project.description}</p>
-          <a href="project.html?id=${project._id}" class="btn btn-sm btn-outline-primary">Open Project</a>
-        `;
-        container.appendChild(card);
-      });
-    });
+        if (!res.ok) throw new Error(data.message);
 
-    function createProject() {
-      alert('Redirecting to create-project.html (not implemented yet)');
+        document.getElementById('groupCount').textContent = data.length;
+        const container = document.getElementById('groupsContainer');
+        container.innerHTML = '';
+
+        data.forEach(group => {
+          const card = document.createElement('div');
+          card.className = 'col-md-4';
+          card.innerHTML = `
+            <div class="project-card">
+              <h5>${group.name}</h5>
+              <p>Members: ${group.members.join(', ')}</p>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+
+      } catch (error) {
+        console.error('Error fetching groups:', error);
+      }
+    }
+
+    function createGroup() {
+      const groupName = prompt("Enter new group name:");
+      if (!groupName) return;
+
+      const memberEmails = prompt("Enter member emails (comma-separated):");
+      if (!memberEmails) return;
+
+      fetch('https://collabsync-backend-i376.onrender.com/api/groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: groupName,
+          managerId: userId,
+          members: memberEmails.split(',').map(e => e.trim())
+        })
+      }).then(res => res.json())
+        .then(data => {
+          if (data.message) alert(data.message);
+          fetchGroups();
+        })
+        .catch(err => alert('Failed to create group.'));
     }
 
     function logout() {
-      localStorage.removeItem('username');
-      localStorage.removeItem('token');  // If token is used later
-      window.location.href = 'login.html';
+      localStorage.clear();
+      window.location.href = 'Auth_page.html';
     }
+
+    document.addEventListener('DOMContentLoaded', fetchGroups);
   </script>
 </body>
 </html>
