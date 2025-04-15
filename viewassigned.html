@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>View Assigned Employees | CollabSync</title>
+  <link rel="stylesheet" href="styles/css/managerdash1.css" />
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <span class="navbar-brand">CollabSync</span>
+    <div>
+      <a href="assign_employees.html" class="btn btn-outline-light me-2">Assign More</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div class="container">
+    <h2>Employees Assigned Under You</h2>
+    <div id="assignedContainer" class="employee-grid">
+      <!-- Assigned employee cards will appear here -->
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    const managerId = localStorage.getItem("userId");
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`);
+        const employees = await res.json();
+
+        const container = document.getElementById("assignedContainer");
+        container.innerHTML = "";
+
+        if (employees.length === 0) {
+          container.innerHTML = "<p>No employees assigned yet.</p>";
+          return;
+        }
+
+        employees.forEach(emp => {
+          const card = document.createElement("div");
+          card.className = "employee-card";
+          card.innerHTML = `
+            <h4>${emp.name}</h4>
+            <p><strong>ID:</strong> ${emp._id}</p>
+            <p><strong>Dept:</strong> ${emp.branch}</p>
+            <p><strong>Email:</strong> ${emp.email}</p>
+          `;
+          container.appendChild(card);
+        });
+
+      } catch (err) {
+        console.error("❌ Error loading assigned employees:", err);
+        alert("Failed to load assigned employees.");
+      }
+    });
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "Auth_page.html";
+    }
+  </script>
+
+</body>
+</html>
