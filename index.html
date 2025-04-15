@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Employee Registration - Collaborative Tool</title>
-  <link rel="stylesheet" href="styles/css/form.css">
+  <link rel="stylesheet" href="styles/css/form.css" />
 </head>
 <body>
 
@@ -12,10 +12,10 @@
     <h1>Employee Registration</h1>
     <form id="registrationForm">
       <label for="emp_id">Employee ID :</label>
-      <input type="text" id="emp_id" name="emp_id" required>
+      <input type="text" id="emp_id" name="emp_id" required />
 
       <label for="name">Name :</label>
-      <input type="text" id="name" name="name" required>
+      <input type="text" id="name" name="name" required />
 
       <label for="department">Department :</label>
       <select name="department" id="department" required>
@@ -30,7 +30,13 @@
       </select>
 
       <label for="email">Email :</label>
-      <input type="email" id="email" name="email" required>
+      <input type="email" id="email" name="email" required />
+
+      <label for="password">Password :</label>
+      <input type="password" id="password" name="password" required />
+
+      <label for="confirmPassword">Confirm Password :</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" required />
 
       <button type="submit">Submit</button>
     </form>
@@ -44,18 +50,25 @@
       const name = document.getElementById('name').value;
       const department = document.getElementById('department').value;
       const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (password !== confirmPassword) {
+        alert("Passwords do not match. Please re-enter.");
+        return;
+      }
 
       try {
         const response = await fetch('https://collabsync-backend-i376.onrender.com/post', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ emp_id, name, department, email }),
+          body: JSON.stringify({ emp_id, name, department, email, password }),
         });
 
         const data = await response.text();
 
         if (response.ok) {
-          localStorage.setItem('username', name);  // ✅ Store name for Dashboard
+          localStorage.setItem('username', name);
           window.location.href = 'Dashboard.html';
         } else {
           alert(data || 'Error occurred while registering.');
