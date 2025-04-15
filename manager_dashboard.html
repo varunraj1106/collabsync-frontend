@@ -59,7 +59,7 @@
     let allEmployees = [];
 
     document.addEventListener("DOMContentLoaded", async () => {
-      const res = await fetch("https://collabsync-backend-i376.onrender.com/api/users/all");
+      const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/all?managerId=${managerId}`);
       let employees = await res.json();
 
       // ✅ FIX: Remove manager from the list
