@@ -10,6 +10,15 @@
 </head>
 <body class="bg-light">
 
+  <!-- ✅ Session Check -->
+  <script>
+    const managerId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
+    if (!managerId) {
+      alert("Session expired. Please log in again.");
+      window.location.href = "/Auth_page.html";
+    }
+  </script>
+
   <!-- Navbar -->
   <nav class="navbar navbar-dark bg-dark px-4">
     <span class="navbar-brand mb-0 h1">CollabSync</span>
@@ -54,13 +63,6 @@
 
   <!-- Scripts -->
   <script>
-    const managerId = localStorage.getItem("userId");
-
-    if (!managerId) {
-      alert("Session expired. Please log in again.");
-      window.location.href = "Auth_page.html";
-    }
-
     document.addEventListener("DOMContentLoaded", fetchEmployees);
     document.getElementById("filterId").addEventListener("input", fetchEmployees);
     document.getElementById("filterName").addEventListener("input", fetchEmployees);
@@ -131,7 +133,8 @@
 
     function logout() {
       localStorage.clear();
-      window.location.href = "Auth_page.html";
+      sessionStorage.clear();
+      window.location.href = "/Auth_page.html";
     }
   </script>
 </body>
