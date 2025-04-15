@@ -14,7 +14,8 @@
     <div class="container-fluid">
       <a class="navbar-brand" href="#">CollabSync</a>
       <div class="d-flex">
-        <button class="btn btn-outline-light me-2" onclick="logout()">Logout</button>
+        <a href="assign_employees.html" class="btn btn-outline-light me-2">Assign Employees</a> <!-- ✅ HREF ADDED -->
+        <button class="btn btn-outline-light" onclick="logout()">Logout</button>
       </div>
     </div>
   </nav>
@@ -60,10 +61,7 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/all?managerId=${managerId}`);
-      let employees = await res.json();
-
-      // ✅ FIX: Remove manager from the list
-      allEmployees = employees.filter(emp => emp._id !== managerId);
+      allEmployees = await res.json(); // ✅ Already filtered by backend
       renderEmployees(allEmployees);
 
       document.getElementById("filterId").addEventListener("input", applyFilters);
