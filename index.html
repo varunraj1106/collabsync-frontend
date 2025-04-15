@@ -46,10 +46,10 @@
     document.getElementById('registrationForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const emp_id = document.getElementById('emp_id').value;
-      const name = document.getElementById('name').value;
+      const emp_id = document.getElementById('emp_id').value.trim();
+      const name = document.getElementById('name').value.trim();
       const department = document.getElementById('department').value;
-      const email = document.getElementById('email').value;
+      const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
 
@@ -70,8 +70,8 @@
         if (response.ok) {
           localStorage.setItem('username', name);
 
-          // Redirect based on employee ID prefix
-          if (emp_id.startsWith("MM")) {
+          const normalizedEmpId = emp_id.toUpperCase(); // Ensure case-insensitive check
+          if (normalizedEmpId.startsWith("MM")) {
             window.location.href = "manager_dashboard.html";
           } else {
             window.location.href = "Dashboard.html";
