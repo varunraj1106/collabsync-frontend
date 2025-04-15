@@ -14,7 +14,7 @@
   <nav class="navbar navbar-dark bg-dark px-4">
     <span class="navbar-brand mb-0 h1">CollabSync</span>
     <div>
-      <a href="viewassigned.html" class="btn btn-outline-light me-2">View Assigned</a>
+      <a href="/viewassigned.html" class="btn btn-outline-light me-2">View Assigned</a>
       <button class="btn btn-danger" onclick="logout()">Logout</button>
     </div>
   </nav>
@@ -54,11 +54,11 @@
 
   <!-- Scripts -->
   <script>
-    const managerId = localStorage.getItem("userId");
+    const managerId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
 
     if (!managerId) {
       alert("Session expired. Please log in again.");
-      window.location.href = "Auth_page.html";
+      window.location.href = "/Auth_page.html";
     }
 
     document.addEventListener("DOMContentLoaded", fetchEmployees);
@@ -67,15 +67,10 @@
     document.getElementById("filterDept").addEventListener("change", fetchEmployees);
 
     async function fetchEmployees() {
-      const container = document.getElementById("employeeContainer");
-      container.innerHTML = "<p class='text-muted'>Loading...</p>";
-
       try {
         const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/available/${managerId}`);
         const all = await res.json();
-
-        console.log("📦 Available employees fetched:", all);
-
+        const container = document.getElementById("employeeContainer");
         container.innerHTML = "";
 
         const idFilter = document.getElementById("filterId").value.toLowerCase();
@@ -88,10 +83,8 @@
           (deptFilter === "" || emp.branch === deptFilter)
         );
 
-        console.log("🔍 Filtered employees:", filtered);
-
         if (filtered.length === 0) {
-          container.innerHTML = "<p class='text-muted'>No matching employees found.</p>";
+          container.innerHTML = `<div class="col-12 text-muted">No employees found.</div>`;
           return;
         }
 
@@ -114,7 +107,8 @@
         });
       } catch (error) {
         console.error("❌ Error fetching employees:", error);
-        container.innerHTML = "<p class='text-danger'>Failed to load employees.</p>";
+        document.getElementById("employeeContainer").innerHTML =
+          `<div class="col-12 text-danger">Failed to load employees.</div>`;
       }
     }
 
@@ -144,9 +138,11 @@
 
     function logout() {
       localStorage.clear();
-      window.location.href = "Auth_page.html";
+      sessionStorage.clear();
+      window.location.href = "/Auth_page.html";
     }
   </script>
 </body>
 </html>
+
 
