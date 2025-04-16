@@ -85,6 +85,15 @@
     <div class="modal-content">
       <h3 id="modalTitle">Create a New Group</h3>
       <input type="text" id="groupName" placeholder="Group Name" />
+      <select id="groupStatus">
+        <option disabled selected>Select Status</option>
+        <option>Requirement Gathering</option>
+        <option>In Dev</option>
+        <option>Dev Completed</option>
+        <option>In Testing</option>
+        <option>Testing Done</option>
+        <option>Done</option>
+      </select>
       <select id="groupMembers" multiple></select>
       <button class="save-btn" onclick="saveGroup()">Save</button>
       <button class="cancel-btn" onclick="closeModal()">Cancel</button>
@@ -131,8 +140,9 @@
 
           card.innerHTML = `
             <h4>${group.name}</h4>
+            <p>Status: <strong>${group.status || "Not Assigned"}</strong></p>
             <p>Members: ${memberNames.join(", ") || "None"}</p>
-            <button class="btn edit-btn" onclick='editGroup("${group._id}", "${group.name}", ${JSON.stringify(group.members)})'>Edit</button>
+            <button class="btn edit-btn" onclick='editGroup("${group._id}", "${group.name}", "${group.status}", ${JSON.stringify(group.members)})'>Edit</button>
             <button class="btn delete-btn" onclick="deleteGroup('${group._id}')">Delete</button>
           `;
 
@@ -149,6 +159,7 @@
       document.getElementById("modalTitle").innerText = "Create a New Group";
       document.getElementById("groupModal").style.display = "block";
       document.getElementById("groupName").value = "";
+      document.getElementById("groupStatus").value = "Select Status";
       loadEmployeeOptions([]);
     }
 
@@ -172,10 +183,11 @@
 
     async function saveGroup() {
       const name = document.getElementById("groupName").value.trim();
+      const status = document.getElementById("groupStatus").value;
       const members = Array.from(document.getElementById("groupMembers").selectedOptions).map(opt => opt.value);
 
-      if (!name || members.length === 0) {
-        alert("Please enter a name and select members.");
+      if (!name || members.length === 0 || status === "Select Status") {
+        alert("Please enter all fields including status.");
         return;
       }
 
@@ -184,7 +196,7 @@
         ? `https://collabsync-backend-i376.onrender.com/api/groups/${editingGroupId}`
         : "https://collabsync-backend-i376.onrender.com/api/groups";
 
-      const body = { name, members, managerId };
+      const body = { name, members, managerId, status };
 
       try {
         const res = await fetch(url, {
@@ -218,10 +230,11 @@
       }
     }
 
-    function editGroup(id, name, memberIds) {
+    function editGroup(id, name, status, memberIds) {
       editingGroupId = id;
       document.getElementById("modalTitle").innerText = "Edit Group";
       document.getElementById("groupName").value = name;
+      document.getElementById("groupStatus").value = status;
       loadEmployeeOptions(memberIds);
       document.getElementById("groupModal").style.display = "block";
     }
@@ -234,4 +247,5 @@
   </script>
 </body>
 </html>
+
 
