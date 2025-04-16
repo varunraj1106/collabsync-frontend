@@ -20,57 +20,59 @@
 
   <div class="container py-4">
     <h2 class="mb-3">Employees Assigned Under You</h2>
-
     <p id="noAssigned" class="text-muted">Loading...</p>
-
-    <div id="assignedContainer" class="row g-3">
-      <!-- Assigned employees will be rendered here -->
-    </div>
+    <div id="assignedContainer" class="row g-3"></div>
   </div>
 
   <script>
     const managerId = localStorage.getItem("userId");
-    console.log("🟡 Logged-in managerId:", managerId); // Debug log
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      const container = document.getElementById("assignedContainer");
-      const placeholder = document.getElementById("noAssigned");
+    if (!managerId) {
+      document.getElementById("noAssigned").innerText = "You are not logged in.";
+      console.warn("No manager ID found in localStorage.");
+    } else {
+      console.log("🟡 Logged-in managerId:", managerId);
 
-      try {
-        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`);
-        const employees = await res.json();
+      document.addEventListener("DOMContentLoaded", async () => {
+        const container = document.getElementById("assignedContainer");
+        const placeholder = document.getElementById("noAssigned");
 
-        if (!res.ok) throw new Error("Failed to fetch assigned users");
+        try {
+          const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`);
+          const employees = await res.json();
 
-        if (!Array.isArray(employees) || employees.length === 0) {
-          placeholder.innerText = "No employees assigned yet.";
-          return;
+          if (!res.ok) throw new Error("Failed to fetch assigned users");
+
+          if (!Array.isArray(employees) || employees.length === 0) {
+            placeholder.innerText = "No employees assigned yet.";
+            return;
+          }
+
+          placeholder.style.display = "none";
+
+          employees.forEach(emp => {
+            const col = document.createElement("div");
+            col.className = "col-md-4";
+
+            const card = document.createElement("div");
+            card.className = "card shadow-sm p-3 h-100";
+            card.innerHTML = `
+              <h5 class="fw-bold">${emp.name}</h5>
+              <p class="mb-1"><strong>ID:</strong> ${emp._id}</p>
+              <p class="mb-1"><strong>Dept:</strong> ${emp.branch}</p>
+              <p class="mb-2"><strong>Email:</strong> ${emp.email}</p>
+              <button class="btn btn-outline-danger w-100" onclick="unassignEmployee('${emp._id}', this)">Remove</button>
+            `;
+
+            col.appendChild(card);
+            container.appendChild(col);
+          });
+        } catch (err) {
+          console.error("❌ Error fetching assigned employees:", err);
+          placeholder.innerText = "❌ Error fetching assigned employees.";
         }
-
-        placeholder.style.display = "none";
-
-        employees.forEach(emp => {
-          const col = document.createElement("div");
-          col.className = "col-md-4";
-
-          const card = document.createElement("div");
-          card.className = "card shadow-sm p-3 h-100";
-          card.innerHTML = `
-            <h5 class="fw-bold">${emp.name}</h5>
-            <p class="mb-1"><strong>ID:</strong> ${emp._id}</p>
-            <p class="mb-1"><strong>Dept:</strong> ${emp.branch}</p>
-            <p class="mb-2"><strong>Email:</strong> ${emp.email}</p>
-            <button class="btn btn-outline-danger w-100" onclick="unassignEmployee('${emp._id}', this)">Remove</button>
-          `;
-
-          col.appendChild(card);
-          container.appendChild(col);
-        });
-      } catch (err) {
-        console.error("❌ Error fetching assigned employees:", err);
-        placeholder.innerText = "❌ Error fetching assigned employees.";
-      }
-    });
+      });
+    }
 
     async function unassignEmployee(empId, button) {
       try {
@@ -87,7 +89,6 @@
           button.disabled = true;
           button.classList.remove("btn-outline-danger");
           button.classList.add("btn-success");
-
           button.closest(".col-md-4").remove();
         } else {
           alert(result.message || "❌ Failed to remove employee.");
