@@ -9,7 +9,6 @@
 </head>
 <body class="bg-light">
 
-  <!-- Navbar -->
   <nav class="navbar navbar-dark bg-dark px-4">
     <span class="navbar-brand mb-0 h1">CollabSync</span>
     <div>
@@ -18,7 +17,6 @@
     </div>
   </nav>
 
-  <!-- Main Content -->
   <div class="container py-4">
     <h2 class="mb-3">Employees Assigned Under You</h2>
     <p id="noEmployees" class="text-muted">Loading...</p>
@@ -32,8 +30,6 @@
       document.getElementById("noEmployees").innerText = "You are not logged in.";
       console.warn("⚠️ No manager ID found in storage.");
     } else {
-      console.log("✅ Manager ID:", managerId);
-
       document.addEventListener("DOMContentLoaded", async () => {
         const container = document.getElementById("employeeContainer");
         const placeholder = document.getElementById("noEmployees");
@@ -82,3 +78,4 @@
   </script>
 </body>
 </html>
+
