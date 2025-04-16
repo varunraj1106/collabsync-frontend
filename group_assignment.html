@@ -60,6 +60,18 @@
       float: right;
     }
 
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      border-radius: 5px;
+      cursor: pointer;
+      float: right;
+      margin-top: -10px;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -143,11 +155,16 @@
       const card = document.createElement("div");
       card.className = "employee-card";
       card.innerHTML = `
-        <h4>${name}</h4>
+        <h4>${name} <button class="delete-btn" onclick="deleteGroup(this)">Delete</button></h4>
         <p>Members: ${selectedOptions.join(", ")}</p>
       `;
       container.appendChild(card);
       closeModal();
+    }
+
+    function deleteGroup(button) {
+      const card = button.closest(".employee-card");
+      card.remove();
     }
 
     function logout() {
@@ -157,3 +174,4 @@
   </script>
 </body>
 </html>
+
