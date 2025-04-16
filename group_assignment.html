@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Group Assignment | CollabSync</title>
+  <title>Task | CollabSync</title>
   <link rel="stylesheet" href="styles/css/managerdash1.css">
   <style>
     .modal {
@@ -76,15 +76,15 @@
 
   <div class="container">
     <h2>Group Assignment</h2>
-    <button class="save-btn" onclick="openModal()">+ Create Group</button>
+    <button class="save-btn" onclick="openModal()">+ Create Tasks</button>
     <div id="groupContainer"></div>
   </div>
 
   <!-- Modal -->
   <div id="groupModal" class="modal">
     <div class="modal-content">
-      <h3 id="modalTitle">Create a New Group</h3>
-      <input type="text" id="groupName" placeholder="Group Name" />
+      <h3 id="modalTitle">Create a New Task</h3>
+      <input type="text" id="groupName" placeholder="Task Name" />
       <select id="groupStatus">
         <option disabled selected value="">Select Status</option>
         <option>Requirement Gathering</option>
@@ -127,7 +127,7 @@
         const container = document.getElementById("groupContainer");
         container.innerHTML = "";
 
-        if (!Array.isArray(groups)) throw new Error("Groups data error");
+        if (!Array.isArray(groups)) throw new Error("Tasks data error");
 
         groups.forEach(group => {
           const card = document.createElement("div");
