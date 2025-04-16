@@ -32,88 +32,53 @@
     <div class="row mb-4">
       <div class="col-md-6">
         <div class="stats-box text-center">
-          <h5>Pending Tasks</h5>
-          <p id="pendingCount" class="fs-4">0</p>
+          <h5>Total Tasks</h5>
+          <p id="taskCount" class="fs-4">0</p>
         </div>
       </div>
       <div class="col-md-6">
         <div class="stats-box text-center">
-          <h5>Completed Tasks</h5>
-          <p id="doneCount" class="fs-4">0</p>
+          <h5>Total Groups</h5>
+          <p id="groupCount" class="fs-4">0</p>
         </div>
       </div>
     </div>
 
-    <h4>Your Tasks</h4>
+    <h4>Your Project Groups</h4>
     <div id="groupsContainer" class="row"></div>
   </div>
 
   <script>
     const userId = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
-    document.getElementById('username').textContent = username || 'Employee';
+    document.getElementById('username').textContent = username || 'Manager';
 
-    const statuses = [
-      "Requirement Gathering",
-      "In Dev",
-      "Dev Completed",
-      "In Testing",
-      "Testing Done",
-      "Done"
-    ];
-    const pendingStatuses = statuses.slice(0, 5); // First 5 = Pending
-    const doneStatus = "Done";
-
-    async function fetchTasks() {
+    async function fetchGroups() {
       try {
-        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/tasks/by-employee/${userId}`);
-        const tasks = await res.json();
+        const res = await fetch(https://collabsync-backend-i376.onrender.com/api/groups?managerId=${userId});
+        const data = await res.json();
 
-        if (!res.ok) throw new Error(tasks.message);
+        if (!res.ok) throw new Error(data.message);
 
-        const taskContainer = document.getElementById('groupsContainer');
-        taskContainer.innerHTML = '';
+        document.getElementById('groupCount').textContent = data.length;
+        const container = document.getElementById('groupsContainer');
+        container.innerHTML = '';
 
-        let pending = 0;
-        let done = 0;
-
-        tasks.forEach(task => {
-          const noteKey = `note-${task._id}-${userId}`;
-          const savedNote = localStorage.getItem(noteKey) || '';
-
+        data.forEach(group => {
           const card = document.createElement('div');
           card.className = 'col-md-4';
-
-          card.innerHTML = `
+          card.innerHTML = 
             <div class="project-card">
-              <h5>${task.title}</h5>
-              <p><strong>Type:</strong> ${task.type}</p>
-              <p><strong>Status:</strong> ${task.status}</p>
-              <p><strong>Group:</strong> ${task.group || '—'}</p>
-              <textarea class="form-control mb-2" rows="2" placeholder="Write your update..." id="note-${task._id}">${savedNote}</textarea>
-              <button class="btn btn-sm btn-outline-primary" onclick="saveNote('${task._id}')">Save Note</button>
+              <h5>${group.name}</h5>
+              <p>Members: ${group.members.join(', ')}</p>
             </div>
-          `;
-
-          taskContainer.appendChild(card);
-
-          if (doneStatus === task.status) done++;
-          else if (pendingStatuses.includes(task.status)) pending++;
+          ;
+          container.appendChild(card);
         });
 
-        document.getElementById('pendingCount').textContent = pending;
-        document.getElementById('doneCount').textContent = done;
-
       } catch (error) {
-        console.error('Error fetching tasks:', error);
+        console.error('Error fetching groups:', error);
       }
-    }
-
-    function saveNote(taskId) {
-      const note = document.getElementById(`note-${taskId}`).value;
-      const noteKey = `note-${taskId}-${userId}`;
-      localStorage.setItem(noteKey, note);
-      alert('Note saved successfully.');
     }
 
     function createGroup() {
@@ -129,12 +94,12 @@
         body: JSON.stringify({
           name: groupName,
           managerId: userId,
-          members: memberEmails.split(',').map(e => e.trim()),
-          status: "Requirement Gathering"
+          members: memberEmails.split(',').map(e => e.trim())
         })
       }).then(res => res.json())
         .then(data => {
           if (data.message) alert(data.message);
+          fetchGroups();
         })
         .catch(err => alert('Failed to create group.'));
     }
@@ -144,7 +109,7 @@
       window.location.href = 'Auth_page.html';
     }
 
-    document.addEventListener('DOMContentLoaded', fetchTasks);
+    document.addEventListener('DOMContentLoaded', fetchGroups);
   </script>
 </body>
 </html>
