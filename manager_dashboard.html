@@ -33,15 +33,6 @@
       margin-bottom: 10px;
       box-shadow: 1px 1px 4px rgba(0,0,0,0.05);
     }
-    .task-card .tag {
-      display: inline-block;
-      background-color: #e1ecf4;
-      color: #0366d6;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 12px;
-      margin-right: 5px;
-    }
     .task-card small {
       font-size: 12px;
       color: gray;
@@ -66,7 +57,7 @@
   <div class="container mt-4">
     <h3 class="mb-3">Dashboard (All Groups)</h3>
     <div class="kanban-board" id="kanbanBoard">
-      <!-- Columns will be injected here -->
+      <!-- Status columns injected here -->
     </div>
   </div>
 
@@ -82,10 +73,10 @@
       "Done"
     ];
 
-    async function fetchTasks() {
+    async function fetchGroups() {
       try {
-        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/tasks/by-manager/${managerId}`);
-        const tasks = await res.json();
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups?managerId=${managerId}`);
+        const groups = await res.json();
 
         const board = document.getElementById("kanbanBoard");
         board.innerHTML = "";
@@ -95,29 +86,28 @@
           column.className = "kanban-column";
           column.innerHTML = `<h5>${status.toUpperCase()}</h5>`;
 
-          const filtered = tasks.filter(task => task.status === status);
+          const filtered = groups.filter(group => group.status === status);
           if (filtered.length === 0) {
-            column.innerHTML += `<p class="text-muted text-center">No tasks</p>`;
+            column.innerHTML += `<p class="text-muted text-center">No groups</p>`;
           }
 
-          filtered.forEach(task => {
+          filtered.forEach(group => {
             const card = document.createElement("div");
             card.className = "task-card";
+            const members = group.members?.map(m => `<li>${m}</li>`).join('') || 'None';
+
             card.innerHTML = `
-              <strong>${task.title}</strong><br/>
-              <small>Type: ${task.type}</small><br/>
-              ${task.tags?.map(tag => `<span class="tag">${tag}</span>`).join('') || ''}
-              <br/><small>Assignee: ${task.assignee || 'Unassigned'}</small>
+              <strong>${group.name}</strong><br/>
+              <small>Members:</small><ul>${members}</ul>
             `;
             column.appendChild(card);
           });
 
           board.appendChild(column);
         });
-
       } catch (err) {
-        console.error("❌ Failed to load tasks:", err);
-        alert("Could not load dashboard tasks.");
+        console.error("❌ Failed to load groups:", err);
+        alert("Could not load groups.");
       }
     }
 
@@ -127,7 +117,8 @@
       window.location.href = "Auth_page.html";
     }
 
-    document.addEventListener("DOMContentLoaded", fetchTasks);
+    document.addEventListener("DOMContentLoaded", fetchGroups);
   </script>
 </body>
 </html>
+
