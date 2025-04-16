@@ -65,20 +65,20 @@
           body: JSON.stringify({ emp_id, name, department, email, password }),
         });
 
-        const data = await response.text();
+        const data = await response.json(); // ✅ FIXED: Parse response as JSON
 
         if (response.ok) {
           localStorage.setItem('username', name);
-          localStorage.setItem('userId', data._id); // ✅ FIX: Save emp_id for future access
+          localStorage.setItem('userId', data._id); // ✅ Will now store the correct user ID
 
-          const normalizedEmpId = emp_id.toUpperCase(); // Ensure case-insensitive check
+          const normalizedEmpId = emp_id.toUpperCase();
           if (normalizedEmpId.startsWith("MM")) {
             window.location.href = "manager_dashboard.html";
           } else {
             window.location.href = "Dashboard.html";
           }
         } else {
-          alert(data || 'Error occurred while registering.');
+          alert(data.message || 'Error occurred while registering.');
         }
       } catch (error) {
         console.error('Error:', error);
