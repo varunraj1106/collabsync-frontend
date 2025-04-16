@@ -42,6 +42,7 @@
     .btn {
       padding: 8px 14px;
       margin-top: 10px;
+      width: 100%;
     }
     .delete-btn {
       background-color: #e74c3c;
@@ -50,6 +51,20 @@
     .edit-btn {
       background-color: #2980b9;
       color: white;
+    }
+    .save-btn {
+      background-color: #27ae60;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 5px;
+    }
+    .cancel-btn {
+      background-color: #999;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 5px;
     }
   </style>
 </head>
@@ -93,7 +108,7 @@
     async function fetchGroups() {
       try {
         const [groupRes, empRes] = await Promise.all([
-          fetch(`https://collabsync-backend-i376.onrender.com/api/groups?managerId=${managerId}`),
+          fetch(`https://collabsync-backend-i376.onrender.com/api/groups/by-manager/${managerId}`),
           fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`)
         ]);
 
@@ -111,13 +126,13 @@
 
           const memberNames = group.members.map(id => {
             const user = allEmployees.find(e => e._id === id);
-            return user ? `${user.name} (${user._id})` : `${id}`;
+            return user ? `${user.name} (${user._id})` : id;
           });
 
           card.innerHTML = `
             <h4>${group.name}</h4>
             <p>Members: ${memberNames.join(", ") || "None"}</p>
-            <button class="btn edit-btn" onclick="editGroup('${group._id}', '${group.name}', ${JSON.stringify(group.members)})">Edit</button>
+            <button class="btn edit-btn" onclick='editGroup("${group._id}", "${group.name}", ${JSON.stringify(group.members)})'>Edit</button>
             <button class="btn delete-btn" onclick="deleteGroup('${group._id}')">Delete</button>
           `;
 
@@ -219,6 +234,3 @@
   </script>
 </body>
 </html>
-
-
-
