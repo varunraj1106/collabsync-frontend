@@ -12,12 +12,17 @@
       padding: 1rem 2rem; background-color: #fff;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
-    .stats-box, .task-card {
+    .stats-box, .project-card {
       background-color: #fff; padding: 1rem; border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.05); margin-bottom: 1rem;
     }
     .note-area {
-      margin-top: 8px;
+      margin-top: 10px;
+    }
+    textarea {
+      width: 100%;
+      height: 60px;
+      resize: none;
     }
   </style>
 </head>
@@ -25,10 +30,7 @@
 
   <div class="top-bar">
     <h3>Welcome, <span id="username"></span></h3>
-    <div>
-      <!-- Removed + Create Group button -->
-      <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
-    </div>
+    <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
   </div>
 
   <div class="container mt-4">
@@ -48,7 +50,7 @@
     </div>
 
     <h4>Your Tasks</h4>
-    <div id="tasksContainer" class="row"></div>
+    <div id="groupsContainer" class="row"></div>
   </div>
 
   <script>
@@ -56,58 +58,57 @@
     const username = localStorage.getItem('username');
     document.getElementById('username').textContent = username || 'Employee';
 
-    async function fetchTasks() {
+    async function fetchGroups() {
       try {
-        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/tasks/by-employee/${userId}`);
-        const tasks = await res.json();
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups`);
+        const data = await res.json();
 
-        let pending = 0;
-        let done = 0;
+        if (!res.ok) throw new Error(data.message);
 
-        const container = document.getElementById('tasksContainer');
-        container.innerHTML = '';
+        const employeeGroups = data.filter(group => group.members.includes(userId));
+        const pending = employeeGroups.filter(g => g.status !== "Done");
+        const done = employeeGroups.filter(g => g.status === "Done");
 
-        tasks.forEach(task => {
-          const noteKey = `note-${task._id}`;
-          const savedNote = localStorage.getItem(noteKey) || "";
+        document.getElementById('pendingCount').textContent = pending.length;
+        document.getElementById('doneCount').textContent = done.length;
 
-          if (task.status === 'Done') done++;
-          else pending++;
+        const container = document.getElementById('groupsContainer');
+        container.innerHTML = "";
 
-          const taskDiv = document.createElement('div');
-          taskDiv.className = 'col-md-6';
-
-          taskDiv.innerHTML = `
-            <div class="task-card">
-              <h5>${task.title}</h5>
-              <p><strong>Status:</strong> ${task.status}</p>
-              <p><strong>Type:</strong> ${task.type}</p>
-              <textarea class="form-control note-area" placeholder="Write a note (max 100 words)" rows="2"
-                oninput="limitWords(this)"
-                onchange="saveNote('${task._id}', this.value)">${savedNote}</textarea>
+        employeeGroups.forEach(group => {
+          const card = document.createElement('div');
+          card.className = 'col-md-6';
+          card.innerHTML = `
+            <div class="project-card">
+              <h5>${group.name}</h5>
+              <p>Status: <strong>${group.status || 'Not Set'}</strong></p>
+              <p>Group Members: ${group.members.join(', ')}</p>
+              <div class="note-area">
+                <label for="note-${group._id}">Note (max 100 words):</label>
+                <textarea id="note-${group._id}" maxlength="600" placeholder="Write your note here..."></textarea>
+                <button class="btn btn-sm btn-primary mt-2" onclick="saveNote('${group._id}')">Save Note</button>
+              </div>
             </div>
           `;
-          container.appendChild(taskDiv);
+          container.appendChild(card);
         });
-
-        document.getElementById('pendingCount').textContent = pending;
-        document.getElementById('doneCount').textContent = done;
 
       } catch (error) {
         console.error('Error fetching tasks:', error);
+        alert("Failed to load your groups.");
       }
     }
 
-    function limitWords(textarea) {
-      const words = textarea.value.trim().split(/\s+/);
-      if (words.length > 100) {
-        textarea.value = words.slice(0, 100).join(" ");
+    function saveNote(groupId) {
+      const text = document.getElementById(`note-${groupId}`).value.trim();
+      if (text.split(/\s+/).length > 100) {
+        alert("Note must be 100 words or less.");
+        return;
       }
-    }
 
-    function saveNote(taskId, note) {
-      const trimmed = note.trim().split(/\s+/).slice(0, 100).join(" ");
-      localStorage.setItem(`note-${taskId}`, trimmed);
+      // Optionally save note to backend here
+      console.log(`Note for ${groupId}:`, text);
+      alert("Note saved!");
     }
 
     function logout() {
@@ -115,7 +116,7 @@
       window.location.href = 'Auth_page.html';
     }
 
-    document.addEventListener('DOMContentLoaded', fetchTasks);
+    document.addEventListener('DOMContentLoaded', fetchGroups);
   </script>
 </body>
 </html>
