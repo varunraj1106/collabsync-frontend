@@ -69,6 +69,7 @@
 
         if (response.ok) {
           localStorage.setItem('username', name);
+          localStorage.setItem('userId', emp_id); // ✅ FIX: Save emp_id for future access
 
           const normalizedEmpId = emp_id.toUpperCase(); // Ensure case-insensitive check
           if (normalizedEmpId.startsWith("MM")) {
