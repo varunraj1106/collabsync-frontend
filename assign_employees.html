@@ -74,7 +74,7 @@
         const filtered = employees.filter(emp =>
           emp._id.toLowerCase().includes(idFilter) &&
           emp.name.toLowerCase().includes(nameFilter) &&
-          (deptFilter === "" || emp.branch === deptFilter)
+          (deptFilter === "" || emp.department === deptFilter)
         );
 
         if (filtered.length === 0) {
