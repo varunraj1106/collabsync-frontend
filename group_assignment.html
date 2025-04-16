@@ -187,7 +187,7 @@
       const members = Array.from(document.getElementById("groupMembers").selectedOptions).map(opt => opt.value);
 
       if (!name || members.length === 0 || !status) {
-        alert("Please fill all fields including status and members.");
+        alert("Please enter all fields including status.");
         return;
       }
 
@@ -197,7 +197,6 @@
         : "https://collabsync-backend-i376.onrender.com/api/groups";
 
       const body = { name, members, managerId, status };
-      console.log("📦 Submitting Group:", body);
 
       try {
         const res = await fetch(url, {
@@ -207,7 +206,6 @@
         });
 
         if (!res.ok) throw new Error("Failed to save group");
-
         closeModal();
         fetchGroups();
       } catch (err) {
@@ -249,3 +247,7 @@
   </script>
 </body>
 </html>
+
+
+
+
