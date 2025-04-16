@@ -53,6 +53,17 @@
     const username = localStorage.getItem('username');
     document.getElementById('username').textContent = username || 'Employee';
 
+    const statuses = [
+      "Requirement Gathering",
+      "In Dev",
+      "Dev Completed",
+      "In Testing",
+      "Testing Done",
+      "Done"
+    ];
+    const pendingStatuses = statuses.slice(0, 5); // First 5 = Pending
+    const doneStatus = "Done";
+
     async function fetchTasks() {
       try {
         const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/tasks/by-employee/${userId}`);
@@ -86,8 +97,8 @@
 
           taskContainer.appendChild(card);
 
-          if (task.status === "Done") done++;
-          else pending++;
+          if (doneStatus === task.status) done++;
+          else if (pendingStatuses.includes(task.status)) pending++;
         });
 
         document.getElementById('pendingCount').textContent = pending;
