@@ -16,94 +16,92 @@
       background-color: #fff; padding: 1rem; border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.05); margin-bottom: 1rem;
     }
-    textarea {
-      width: 100%;
-      min-height: 60px;
-      margin-top: 0.5rem;
-    }
   </style>
 </head>
 <body>
 
   <div class="top-bar">
     <h3>Welcome, <span id="username"></span></h3>
-    <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+    <div>
+      <button class="btn btn-sm btn-outline-secondary me-2" onclick="createGroup()">+ Create Group</button>
+      <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+    </div>
   </div>
 
   <div class="container mt-4">
     <div class="row mb-4">
       <div class="col-md-6">
         <div class="stats-box text-center">
-          <h5>Pending Tasks</h5>
-          <p id="pendingCount" class="fs-4">0</p>
+          <h5>Total Tasks</h5>
+          <p id="taskCount" class="fs-4">0</p>
         </div>
       </div>
       <div class="col-md-6">
         <div class="stats-box text-center">
-          <h5>Done Tasks</h5>
-          <p id="doneCount" class="fs-4">0</p>
+          <h5>Total Groups</h5>
+          <p id="groupCount" class="fs-4">0</p>
         </div>
       </div>
     </div>
 
-    <h4>Your Tasks</h4>
+    <h4>Your Project Groups</h4>
     <div id="groupsContainer" class="row"></div>
   </div>
 
   <script>
     const userId = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
-    document.getElementById('username').textContent = username || 'Employee';
+    document.getElementById('username').textContent = username || 'Manager';
 
     async function fetchGroups() {
       try {
-        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups`);
+        const res = await fetch(https://collabsync-backend-i376.onrender.com/api/groups?managerId=${userId});
         const data = await res.json();
-        console.log("✅ All Groups from DB:", data);
-        console.log("👤 Logged-in userId:", userId);
 
         if (!res.ok) throw new Error(data.message);
 
-        const employeeGroups = data.filter(group => group.members.includes(userId));
-        console.log("📌 Filtered Employee Groups:", employeeGroups);
-
-        const pending = employeeGroups.filter(g => g.status !== "Done");
-        const done = employeeGroups.filter(g => g.status === "Done");
-
-        document.getElementById('pendingCount').textContent = pending.length;
-        document.getElementById('doneCount').textContent = done.length;
-
+        document.getElementById('groupCount').textContent = data.length;
         const container = document.getElementById('groupsContainer');
-        container.innerHTML = "";
+        container.innerHTML = '';
 
-        employeeGroups.forEach(group => {
+        data.forEach(group => {
           const card = document.createElement('div');
-          card.className = 'col-md-6';
-          card.innerHTML = `
+          card.className = 'col-md-4';
+          card.innerHTML = 
             <div class="project-card">
               <h5>${group.name}</h5>
-              <p>Status: <strong>${group.status || 'Not Set'}</strong></p>
-              <p>Group Members: ${group.members.join(', ')}</p>
-              <div class="note-area">
-                <label for="note-${group._id}">Note (max 100 words):</label>
-                <textarea id="note-${group._id}" maxlength="600" placeholder="Write your note here..."></textarea>
-                <button class="btn btn-sm btn-primary mt-2" onclick="saveNote('${group._id}')">Save Note</button>
-              </div>
+              <p>Members: ${group.members.join(', ')}</p>
             </div>
-          `;
+          ;
           container.appendChild(card);
         });
+
       } catch (error) {
-        console.error("❌ Error loading groups:", error);
-        alert("Failed to load your groups.");
+        console.error('Error fetching groups:', error);
       }
     }
 
-    function saveNote(groupId) {
-      const note = document.getElementById(`note-${groupId}`).value;
-      console.log(`💾 Saving note for group ${groupId}:`, note);
-      alert("Note saved (for demo only)");
-      // Optionally, send to backend with fetch if note storage is supported.
+    function createGroup() {
+      const groupName = prompt("Enter new group name:");
+      if (!groupName) return;
+
+      const memberEmails = prompt("Enter member emails (comma-separated):");
+      if (!memberEmails) return;
+
+      fetch('https://collabsync-backend-i376.onrender.com/api/groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: groupName,
+          managerId: userId,
+          members: memberEmails.split(',').map(e => e.trim())
+        })
+      }).then(res => res.json())
+        .then(data => {
+          if (data.message) alert(data.message);
+          fetchGroups();
+        })
+        .catch(err => alert('Failed to create group.'));
     }
 
     function logout() {
