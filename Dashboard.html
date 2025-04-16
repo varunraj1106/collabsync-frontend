@@ -44,7 +44,7 @@
       </div>
     </div>
 
-    <h4>Your Tasks</h4>
+    <h4>Your Project Groups</h4>
     <div id="groupsContainer" class="row"></div>
   </div>
 
@@ -64,7 +64,7 @@
 
     async function fetchGroups() {
       try {
-        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups`);
+        const res = await fetch(https://collabsync-backend-i376.onrender.com/api/groups?managerId=${userId});
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message);
@@ -76,23 +76,15 @@
         let doneCount = 0;
 
         data.forEach(group => {
-          if (!group.members.includes(userId)) return; // Show only assigned groups
-
           const card = document.createElement('div');
           card.className = 'col-md-4';
-
-          const noteKey = `note-${group._id}-${userId}`;
-          const savedNote = localStorage.getItem(noteKey) || "";
-
-          card.innerHTML = `
+          card.innerHTML = 
             <div class="project-card">
               <h5>${group.name}</h5>
               <p>Status: ${group.status}</p>
               <p>Members: ${group.members.join(', ')}</p>
-              <textarea class="form-control mb-2" rows="2" placeholder="Write your update here..." id="note-${group._id}">${savedNote}</textarea>
-              <button class="btn btn-sm btn-outline-primary" onclick="saveNote('${group._id}')">Save Note</button>
             </div>
-          `;
+          ;
           container.appendChild(card);
 
           if (statusesDone.includes(group.status)) {
@@ -108,13 +100,6 @@
       } catch (error) {
         console.error('Error fetching groups:', error);
       }
-    }
-
-    function saveNote(groupId) {
-      const noteContent = document.getElementById(`note-${groupId}`).value;
-      const noteKey = `note-${groupId}-${userId}`;
-      localStorage.setItem(noteKey, noteContent);
-      alert("Note saved successfully.");
     }
 
     function createGroup() {
