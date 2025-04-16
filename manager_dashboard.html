@@ -5,7 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Manager Dashboard | CollabSync</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-  <link rel="stylesheet" href="styles/css/managerdash.css" />
+  <style>
+    .kanban-board {
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      margin-top: 30px;
+    }
+    .kanban-column {
+      flex: 1;
+      min-width: 250px;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      padding: 10px;
+    }
+    .kanban-column h5 {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .task-card {
+      background-color: white;
+      border: 1px solid #ccc;
+      border-left: 4px solid #0d6efd;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 10px;
+      box-shadow: 1px 1px 4px rgba(0,0,0,0.05);
+    }
+    .task-card .tag {
+      display: inline-block;
+      background-color: #e1ecf4;
+      color: #0366d6;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-right: 5px;
+    }
+    .task-card small {
+      font-size: 12px;
+      color: gray;
+    }
+  </style>
 </head>
 <body>
 
@@ -15,26 +56,78 @@
       <a class="navbar-brand" href="#">CollabSync</a>
       <div class="d-flex">
         <a href="assign_employees.html" class="btn btn-outline-light me-2">Assign Employees</a>
-        <a href="group_assignment.html" class="btn btn-outline-light me-2">Assign Groups</a> <!-- ✅ NEW BUTTON -->
+        <a href="group_assignment.html" class="btn btn-outline-light me-2">Assign Groups</a>
         <button class="btn btn-outline-light" onclick="logout()">Logout</button>
       </div>
     </div>
   </nav>
 
-  <!-- Main Content Area -->
-  <div class="container mt-5">
-    <h2>Welcome, Manager</h2>
-    <p>Use the buttons above to assign employees or manage groups.</p>
-    <!-- You can add any widgets or stats here later -->
+  <!-- Dashboard Title -->
+  <div class="container mt-4">
+    <h3 class="mb-3">Dashboard (All Groups)</h3>
+    <div class="kanban-board" id="kanbanBoard">
+      <!-- Columns will be injected here -->
+    </div>
   </div>
 
-  <!-- Scripts -->
   <script>
+    const managerId = localStorage.getItem("userId");
+
+    const statuses = [
+      "Requirement Gathering",
+      "In Dev",
+      "Dev Completed",
+      "In Testing",
+      "Testing Done",
+      "Done"
+    ];
+
+    async function fetchTasks() {
+      try {
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/tasks/by-manager/${managerId}`);
+        const tasks = await res.json();
+
+        const board = document.getElementById("kanbanBoard");
+        board.innerHTML = "";
+
+        statuses.forEach(status => {
+          const column = document.createElement("div");
+          column.className = "kanban-column";
+          column.innerHTML = `<h5>${status.toUpperCase()}</h5>`;
+
+          const filtered = tasks.filter(task => task.status === status);
+          if (filtered.length === 0) {
+            column.innerHTML += `<p class="text-muted text-center">No tasks</p>`;
+          }
+
+          filtered.forEach(task => {
+            const card = document.createElement("div");
+            card.className = "task-card";
+            card.innerHTML = `
+              <strong>${task.title}</strong><br/>
+              <small>Type: ${task.type}</small><br/>
+              ${task.tags?.map(tag => `<span class="tag">${tag}</span>`).join('') || ''}
+              <br/><small>Assignee: ${task.assignee || 'Unassigned'}</small>
+            `;
+            column.appendChild(card);
+          });
+
+          board.appendChild(column);
+        });
+
+      } catch (err) {
+        console.error("❌ Failed to load tasks:", err);
+        alert("Could not load dashboard tasks.");
+      }
+    }
+
     function logout() {
       localStorage.clear();
       sessionStorage.clear();
       window.location.href = "Auth_page.html";
     }
+
+    document.addEventListener("DOMContentLoaded", fetchTasks);
   </script>
 </body>
 </html>
