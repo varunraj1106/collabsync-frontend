@@ -86,7 +86,7 @@
       <h3 id="modalTitle">Create a New Group</h3>
       <input type="text" id="groupName" placeholder="Group Name" />
       <select id="groupStatus">
-        <option disabled selected>Select Status</option>
+        <option disabled selected value="">Select Status</option>
         <option>Requirement Gathering</option>
         <option>In Dev</option>
         <option>Dev Completed</option>
@@ -159,7 +159,7 @@
       document.getElementById("modalTitle").innerText = "Create a New Group";
       document.getElementById("groupModal").style.display = "block";
       document.getElementById("groupName").value = "";
-      document.getElementById("groupStatus").value = "Select Status";
+      document.getElementById("groupStatus").value = "";
       loadEmployeeOptions([]);
     }
 
@@ -186,7 +186,7 @@
       const status = document.getElementById("groupStatus").value;
       const members = Array.from(document.getElementById("groupMembers").selectedOptions).map(opt => opt.value);
 
-      if (!name || members.length === 0 || status === "Select Status") {
+      if (!name || members.length === 0 || !status) {
         alert("Please enter all fields including status.");
         return;
       }
@@ -247,5 +247,6 @@
   </script>
 </body>
 </html>
+
 
 
