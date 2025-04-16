@@ -65,11 +65,12 @@
           body: JSON.stringify({ emp_id, name, department, email, password }),
         });
 
-        const data = await response.json(); // ✅ FIXED: Parse response as JSON
+        const data = await response.json();
 
         if (response.ok) {
+          // ✅ Store both userId and name
+          localStorage.setItem('userId', emp_id);
           localStorage.setItem('username', name);
-          localStorage.setItem('userId', data._id); // ✅ Will now store the correct user ID
 
           const normalizedEmpId = emp_id.toUpperCase();
           if (normalizedEmpId.startsWith("MM")) {
