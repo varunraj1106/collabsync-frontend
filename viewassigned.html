@@ -30,6 +30,7 @@
 
   <script>
     const managerId = localStorage.getItem("userId");
+    console.log("🟡 Logged-in managerId:", managerId); // Debug log
 
     document.addEventListener("DOMContentLoaded", async () => {
       const container = document.getElementById("assignedContainer");
@@ -39,16 +40,13 @@
         const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`);
         const employees = await res.json();
 
-        if (!res.ok) {
-          throw new Error("Failed to fetch assigned users");
-        }
+        if (!res.ok) throw new Error("Failed to fetch assigned users");
 
-        if (employees.length === 0) {
+        if (!Array.isArray(employees) || employees.length === 0) {
           placeholder.innerText = "No employees assigned yet.";
           return;
         }
 
-        // Hide the placeholder
         placeholder.style.display = "none";
 
         employees.forEach(emp => {
@@ -108,4 +106,3 @@
   </script>
 </body>
 </html>
-
