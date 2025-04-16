@@ -108,7 +108,7 @@
     async function fetchGroups() {
       try {
         const [groupRes, empRes] = await Promise.all([
-          fetch(`https://collabsync-backend-i376.onrender.com/api/groups/by-manager/${managerId}`),
+          fetch(`https://collabsync-backend-i376.onrender.com/api/groups?managerId=${managerId}`),
           fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`)
         ]);
 
