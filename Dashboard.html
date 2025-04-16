@@ -44,62 +44,65 @@
       </div>
     </div>
 
-    <h4>Your Project Groups</h4>
+    <h4>Your Tasks</h4>
     <div id="groupsContainer" class="row"></div>
   </div>
 
   <script>
     const userId = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
-    document.getElementById('username').textContent = username || 'Manager';
+    document.getElementById('username').textContent = username || 'Employee';
 
-    const statusesDone = ["Done"];
-    const statusesPending = [
-      "Requirement Gathering",
-      "In Dev",
-      "Dev Completed",
-      "In Testing",
-      "Testing Done"
-    ];
-
-    async function fetchGroups() {
+    async function fetchTasks() {
       try {
-        const res = await fetch(https://collabsync-backend-i376.onrender.com/api/groups?managerId=${userId});
-        const data = await res.json();
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/tasks/by-employee/${userId}`);
+        const tasks = await res.json();
 
-        if (!res.ok) throw new Error(data.message);
+        if (!res.ok) throw new Error(tasks.message);
 
-        const container = document.getElementById('groupsContainer');
-        container.innerHTML = '';
+        const taskContainer = document.getElementById('groupsContainer');
+        taskContainer.innerHTML = '';
 
-        let pendingCount = 0;
-        let doneCount = 0;
+        let pending = 0;
+        let done = 0;
 
-        data.forEach(group => {
+        tasks.forEach(task => {
+          const noteKey = `note-${task._id}-${userId}`;
+          const savedNote = localStorage.getItem(noteKey) || '';
+
           const card = document.createElement('div');
           card.className = 'col-md-4';
-          card.innerHTML = 
-            <div class="project-card">
-              <h5>${group.name}</h5>
-              <p>Status: ${group.status}</p>
-              <p>Members: ${group.members.join(', ')}</p>
-            </div>
-          ;
-          container.appendChild(card);
 
-          if (statusesDone.includes(group.status)) {
-            doneCount++;
-          } else if (statusesPending.includes(group.status)) {
-            pendingCount++;
-          }
+          card.innerHTML = `
+            <div class="project-card">
+              <h5>${task.title}</h5>
+              <p><strong>Type:</strong> ${task.type}</p>
+              <p><strong>Status:</strong> ${task.status}</p>
+              <p><strong>Group:</strong> ${task.group || '—'}</p>
+              <textarea class="form-control mb-2" rows="2" placeholder="Write your update..." id="note-${task._id}">${savedNote}</textarea>
+              <button class="btn btn-sm btn-outline-primary" onclick="saveNote('${task._id}')">Save Note</button>
+            </div>
+          `;
+
+          taskContainer.appendChild(card);
+
+          if (task.status === "Done") done++;
+          else pending++;
         });
 
-        document.getElementById('pendingCount').textContent = pendingCount;
-        document.getElementById('doneCount').textContent = doneCount;
+        document.getElementById('pendingCount').textContent = pending;
+        document.getElementById('doneCount').textContent = done;
 
       } catch (error) {
-        console.error('Error fetching groups:', error);
+        console.error('Error fetching tasks:', error);
       }
+    }
+
+    function saveNote(taskId) {
+      const note = document.getElementById(`note-${taskId}`).value;
+      const noteKey = `note-${taskId}-${userId}`;
+      localStorage.setItem(noteKey, note);
+      alert('Note saved successfully.');
     }
 
     function createGroup() {
@@ -115,12 +118,12 @@
         body: JSON.stringify({
           name: groupName,
           managerId: userId,
-          members: memberEmails.split(',').map(e => e.trim())
+          members: memberEmails.split(',').map(e => e.trim()),
+          status: "Requirement Gathering"
         })
       }).then(res => res.json())
         .then(data => {
           if (data.message) alert(data.message);
-          fetchGroups();
         })
         .catch(err => alert('Failed to create group.'));
     }
@@ -130,7 +133,7 @@
       window.location.href = 'Auth_page.html';
     }
 
-    document.addEventListener('DOMContentLoaded', fetchGroups);
+    document.addEventListener('DOMContentLoaded', fetchTasks);
   </script>
 </body>
 </html>
