@@ -52,16 +52,18 @@
 
         if (response.ok) {
           const userId = data.user._id;
+          const userName = data.user.name;
 
           if (rememberMe) {
             localStorage.setItem("token", data.token);
             localStorage.setItem("userId", userId);
+            localStorage.setItem("username", userName);
           } else {
             sessionStorage.setItem("token", data.token);
             sessionStorage.setItem("userId", userId);
+            sessionStorage.setItem("username", userName);
           }
 
-          // ✅ Correct page redirect
           if (userId.startsWith("MM")) {
             window.location.href = "/manager_dashboard.html";
           } else {
