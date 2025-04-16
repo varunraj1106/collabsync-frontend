@@ -16,13 +16,10 @@
       background-color: #fff; padding: 1rem; border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.05); margin-bottom: 1rem;
     }
-    .note-area {
-      margin-top: 10px;
-    }
     textarea {
       width: 100%;
-      height: 60px;
-      resize: none;
+      min-height: 60px;
+      margin-top: 0.5rem;
     }
   </style>
 </head>
@@ -62,10 +59,14 @@
       try {
         const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups`);
         const data = await res.json();
+        console.log("✅ All Groups from DB:", data);
+        console.log("👤 Logged-in userId:", userId);
 
         if (!res.ok) throw new Error(data.message);
 
         const employeeGroups = data.filter(group => group.members.includes(userId));
+        console.log("📌 Filtered Employee Groups:", employeeGroups);
+
         const pending = employeeGroups.filter(g => g.status !== "Done");
         const done = employeeGroups.filter(g => g.status === "Done");
 
@@ -92,23 +93,17 @@
           `;
           container.appendChild(card);
         });
-
       } catch (error) {
-        console.error('Error fetching tasks:', error);
+        console.error("❌ Error loading groups:", error);
         alert("Failed to load your groups.");
       }
     }
 
     function saveNote(groupId) {
-      const text = document.getElementById(`note-${groupId}`).value.trim();
-      if (text.split(/\s+/).length > 100) {
-        alert("Note must be 100 words or less.");
-        return;
-      }
-
-      // Optionally save note to backend here
-      console.log(`Note for ${groupId}:`, text);
-      alert("Note saved!");
+      const note = document.getElementById(`note-${groupId}`).value;
+      console.log(`💾 Saving note for group ${groupId}:`, note);
+      alert("Note saved (for demo only)");
+      // Optionally, send to backend with fetch if note storage is supported.
     }
 
     function logout() {
