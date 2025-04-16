@@ -32,14 +32,14 @@
     <div class="row mb-4">
       <div class="col-md-6">
         <div class="stats-box text-center">
-          <h5>Total Tasks</h5>
-          <p id="taskCount" class="fs-4">0</p>
+          <h5>Pending Tasks</h5>
+          <p id="pendingCount" class="fs-4">0</p>
         </div>
       </div>
       <div class="col-md-6">
         <div class="stats-box text-center">
-          <h5>Total Groups</h5>
-          <p id="groupCount" class="fs-4">0</p>
+          <h5>Completed Tasks</h5>
+          <p id="completedCount" class="fs-4">0</p>
         </div>
       </div>
     </div>
@@ -53,28 +53,48 @@
     const username = localStorage.getItem('username');
     document.getElementById('username').textContent = username || 'Manager';
 
+    const statuses = [
+      "Requirement Gathering",
+      "In Dev",
+      "Dev Completed",
+      "In Testing",
+      "Testing Done",
+      "Done"
+    ];
+    const pendingStatuses = statuses.slice(0, 5); // First 5 are pending
+    const completedStatus = "Done";
+
     async function fetchGroups() {
       try {
-        const res = await fetch(https://collabsync-backend-i376.onrender.com/api/groups?managerId=${userId});
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups?managerId=${userId}`);
         const data = await res.json();
 
         if (!res.ok) throw new Error(data.message);
 
-        document.getElementById('groupCount').textContent = data.length;
         const container = document.getElementById('groupsContainer');
         container.innerHTML = '';
 
+        let pendingCount = 0;
+        let completedCount = 0;
+
         data.forEach(group => {
+          if (pendingStatuses.includes(group.status)) pendingCount++;
+          if (group.status === completedStatus) completedCount++;
+
           const card = document.createElement('div');
           card.className = 'col-md-4';
-          card.innerHTML = 
+          card.innerHTML = `
             <div class="project-card">
               <h5>${group.name}</h5>
+              <p>Status: ${group.status}</p>
               <p>Members: ${group.members.join(', ')}</p>
             </div>
-          ;
+          `;
           container.appendChild(card);
         });
+
+        document.getElementById('pendingCount').textContent = pendingCount;
+        document.getElementById('completedCount').textContent = completedCount;
 
       } catch (error) {
         console.error('Error fetching groups:', error);
