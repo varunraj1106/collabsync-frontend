@@ -32,46 +32,71 @@
       document.getElementById("noEmployees").innerText = "You are not logged in.";
       console.warn("⚠️ No manager ID found in storage.");
     } else {
-      console.log("✅ Manager ID:", managerId);
+      loadEmployees();
+    }
 
-      document.addEventListener("DOMContentLoaded", async () => {
-        const container = document.getElementById("employeeContainer");
-        const placeholder = document.getElementById("noEmployees");
+    async function loadEmployees() {
+      const container = document.getElementById("employeeContainer");
+      const placeholder = document.getElementById("noEmployees");
 
-        try {
-          const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`);
-          const employees = await res.json();
+      try {
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/assigned/${managerId}`);
+        const employees = await res.json();
 
-          if (!res.ok) throw new Error("Fetch failed");
+        container.innerHTML = ""; // Clear previous content
 
-          if (!Array.isArray(employees) || employees.length === 0) {
-            placeholder.innerText = "No employees assigned to you.";
-            return;
-          }
-
-          placeholder.style.display = "none";
-
-          employees.forEach(emp => {
-            const col = document.createElement("div");
-            col.className = "col-md-4";
-
-            const card = document.createElement("div");
-            card.className = "card shadow-sm p-3 h-100";
-            card.innerHTML = `
-              <h5 class="fw-bold">${emp.name}</h5>
-              <p><strong>ID:</strong> ${emp._id}</p>
-              <p><strong>Dept:</strong> ${emp.branch}</p>
-              <p><strong>Email:</strong> ${emp.email}</p>
-            `;
-
-            col.appendChild(card);
-            container.appendChild(col);
-          });
-        } catch (err) {
-          console.error("❌ Error loading assigned employees:", err);
-          placeholder.innerText = "Error loading employees.";
+        if (!res.ok || !Array.isArray(employees) || employees.length === 0) {
+          placeholder.innerText = "No employees assigned to you.";
+          return;
         }
-      });
+
+        placeholder.style.display = "none";
+
+        employees.forEach(emp => {
+          const col = document.createElement("div");
+          col.className = "col-md-4";
+
+          const card = document.createElement("div");
+          card.className = "card shadow-sm p-3 h-100";
+          card.innerHTML = `
+            <h5 class="fw-bold">${emp.name}</h5>
+            <p><strong>ID:</strong> ${emp._id}</p>
+            <p><strong>Dept:</strong> ${emp.branch}</p>
+            <p><strong>Email:</strong> ${emp.email}</p>
+            <button class="btn btn-outline-danger w-100 mt-2" onclick="removeEmployee('${emp._id}', this)">Remove</button>
+          `;
+
+          col.appendChild(card);
+          container.appendChild(col);
+        });
+      } catch (err) {
+        console.error("❌ Error loading assigned employees:", err);
+        placeholder.innerText = "Error loading employees.";
+      }
+    }
+
+    async function removeEmployee(empId, btn) {
+      if (!confirm("Are you sure you want to unassign this employee?")) return;
+
+      try {
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/unassign`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ empId, managerId })
+        });
+
+        const result = await res.json();
+        if (res.ok) {
+          // Remove card and refresh list
+          btn.closest(".col-md-4").remove();
+          loadEmployees();
+        } else {
+          alert(result.message || "❌ Unassignment failed.");
+        }
+      } catch (err) {
+        console.error("❌ Error unassigning employee:", err);
+        alert("Something went wrong while unassigning.");
+      }
     }
 
     function logout() {
@@ -82,5 +107,6 @@
   </script>
 </body>
 </html>
+
 
 
