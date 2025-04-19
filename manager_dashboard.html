@@ -57,6 +57,7 @@
     <div class="container-fluid">
       <a class="navbar-brand" href="#">CollabSync</a>
       <div class="d-flex">
+        <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#profileModal">Profile</button>
         <a href="assign_employees.html" class="btn btn-outline-light me-2">Assign Employees</a>
         <a href="group_assignment.html" class="btn btn-outline-light me-2">Assign Tasks</a>
         <a href="Auth_page.html" class="btn btn-outline-light me-2">Sign Out</a>
@@ -69,6 +70,34 @@
     <h3 class="mb-3">Dashboard (All Tasks)</h3>
     <div class="kanban-board" id="kanbanBoard">
       <!-- Columns will be injected here -->
+    </div>
+  </div>
+
+  <!-- Profile Modal -->
+  <div class="modal fade" id="profileModal" tabindex="-1" aria-labelledby="profileModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="profileForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="profileModalLabel">Edit Profile</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="managerName" class="form-label">Name</label>
+              <input type="text" class="form-control" id="managerName" required />
+            </div>
+            <div class="mb-3">
+              <label for="managerPassword" class="form-label">New Password</label>
+              <input type="password" class="form-control" id="managerPassword" required />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -132,16 +161,43 @@
       }
     }
 
-    function logout() {
-      localStorage.clear();
-      sessionStorage.clear();
-      window.location.href = "Auth_page.html";
-    }
+    document.getElementById("profileForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      
+      const userId = localStorage.getItem("userId");
+      const updatedName = document.getElementById("managerName").value;
+      const updatedPassword = document.getElementById("managerPassword").value;
+
+      try {
+        const response = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/update/${userId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name: updatedName,
+            password: updatedPassword
+          })
+        });
+
+        if (response.ok) {
+          alert("Profile updated successfully!");
+          document.getElementById("profileForm").reset();
+          const modal = bootstrap.Modal.getInstance(document.getElementById('profileModal'));
+          modal.hide();
+        } else {
+          const error = await response.json();
+          alert("Failed to update profile: " + error.message);
+        }
+      } catch (err) {
+        console.error("Error updating profile:", err);
+        alert("Error updating profile. Please try again.");
+      }
+    });
 
     document.addEventListener("DOMContentLoaded", fetchGroups);
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
-
-
