@@ -21,7 +21,7 @@
 <body>
 
   <div class="top-bar">
-    <div><strong>CollabSync</strong> | <span id="username"></span></div>
+    <span class="navbar-brand fw-bold">CollabSync</span>
     <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
   </div>
 
@@ -46,15 +46,14 @@
   </div>
 
   <script>
-    const empId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-    const username = localStorage.getItem('username') || 'User';
-
-    console.log("🔐 Logged in as:", empId);
+    const empId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
 
     if (!empId) {
-      alert("Session expired or not found. Please log in again.");
+      alert("Session expired. Please login again.");
       window.location.href = "Auth_page.html";
     }
+
+    console.log("🔐 Logged in as:", empId);
 
     const statuses = [
       "Test Cases",
@@ -64,56 +63,70 @@
       "Prod SignOff",
       "Done"
     ];
-    const pendingStatuses = statuses.slice(0, 5); // First 5 are pending
+
+    const pendingStatuses = statuses.slice(0, 5);
     const completedStatus = "Done";
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const nameSpan = document.getElementById("username");
-      if (nameSpan) nameSpan.textContent = username + " (" + empId + ")";
-      fetchEmployeeGroups();
+    document.addEventListener("DOMContentLoaded", () => {
+      fetchGroupsAndUserDetails();
     });
 
-    async function fetchEmployeeGroups() {
+    async function fetchGroupsAndUserDetails() {
       try {
-        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups`);
-        const allGroups = await res.json();
+        const [groupsRes, usersRes] = await Promise.all([
+          fetch("https://collabsync-backend-i376.onrender.com/api/groups"),
+          fetch("https://collabsync-backend-i376.onrender.com/api/users")
+        ]);
 
-        const assignedGroups = allGroups.filter(group => group.members.includes(empId));
+        const groups = await groupsRes.json();
+        const users = await usersRes.json();
+
+        const currentUser = users.find(u => u.emp_id === empId);
+        const currentUserId = currentUser?._id;
+
+        document.getElementById("username").textContent = currentUser ? currentUser.emp_id : empId;
+
+        const assignedGroups = groups.filter(group =>
+          group.members.includes(currentUserId)
+        );
 
         let pendingCount = 0;
         let completedCount = 0;
 
-        const container = document.getElementById('groupsContainer');
-        container.innerHTML = '';
+        const container = document.getElementById("groupsContainer");
+        container.innerHTML = "";
 
         assignedGroups.forEach(group => {
           if (pendingStatuses.includes(group.status)) pendingCount++;
           if (group.status === completedStatus) completedCount++;
 
-          const card = document.createElement('div');
-          card.className = 'col-md-4';
+          const card = document.createElement("div");
+          card.className = "col-md-4";
           card.innerHTML = `
             <div class="project-card">
               <h5>${group.name}</h5>
               <p>Status: ${group.status}</p>
-              <p>Group ID: ${group._id}</p>
+              <p>Members: ${group.members.map(id => {
+                const u = users.find(user => user._id === id);
+                return u ? `${u.name} (${u.emp_id})` : id;
+              }).join(", ")}</p>
             </div>
           `;
           container.appendChild(card);
         });
 
-        document.getElementById('pendingCount').textContent = pendingCount;
-        document.getElementById('completedCount').textContent = completedCount;
+        document.getElementById("pendingCount").textContent = pendingCount;
+        document.getElementById("completedCount").textContent = completedCount;
 
       } catch (error) {
-        console.error('❌ Error fetching employee groups:', error);
+        console.error("❌ Error loading dashboard data:", error);
       }
     }
 
     function logout() {
       localStorage.clear();
       sessionStorage.clear();
-      window.location.href = 'Auth_page.html';
+      window.location.href = "Auth_page.html";
     }
   </script>
 
