@@ -10,16 +10,14 @@
       display: none;
       position: fixed;
       z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
       overflow: auto;
       background-color: rgba(0,0,0,0.4);
     }
     .modal-content {
       background-color: #fff;
-      margin: 8% auto;
+      margin: 10% auto;
       padding: 20px;
       border-radius: 10px;
       width: 90%;
@@ -29,26 +27,6 @@
       width: 100%;
       padding: 10px;
       margin: 10px 0;
-    }
-    .employee-card {
-      border: 1px solid #ccc;
-      padding: 16px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      position: relative;
-    }
-    .btn {
-      padding: 8px 14px;
-      margin-top: 10px;
-      width: 100%;
-    }
-    .delete-btn {
-      background-color: #e74c3c;
-      color: white;
-    }
-    .edit-btn {
-      background-color: #2980b9;
-      color: white;
     }
     .save-btn {
       background-color: #27ae60;
@@ -64,13 +42,31 @@
       border: none;
       border-radius: 5px;
     }
+    .edit-btn {
+      background-color: #2980b9;
+      color: white;
+      padding: 8px 14px;
+      width: 100%;
+    }
     .note-btn {
       background-color: #f39c12;
       color: white;
-      border: none;
       padding: 8px 14px;
       width: 100%;
-      margin-top: 10px;
+      margin-top: 5px;
+    }
+    .delete-btn {
+      background-color: #e74c3c;
+      color: white;
+      padding: 8px 14px;
+      width: 100%;
+      margin-top: 5px;
+    }
+    .employee-card {
+      border: 1px solid #ccc;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-radius: 8px;
     }
   </style>
 </head>
@@ -86,7 +82,7 @@
     <div id="groupContainer"></div>
   </div>
 
-  <!-- Group Modal -->
+  <!-- Create/Edit Modal -->
   <div id="groupModal" class="modal">
     <div class="modal-content">
       <h3 id="modalTitle">Create a New Task</h3>
@@ -110,12 +106,10 @@
   <div id="noteModal" class="modal">
     <div class="modal-content">
       <h3>Task Note</h3>
-      <textarea id="taskNote" rows="3" placeholder="Add a short description (max 100 words)"></textarea>
+      <textarea id="noteContent" rows="4" placeholder="Task notes"></textarea>
       <input type="date" id="completionDate" />
-      <div class="d-flex justify-content-end mt-2">
-        <button class="cancel-btn" onclick="closeNoteModal()">Close</button>
-        <button class="save-btn ms-2" onclick="saveNote()">Save</button>
-      </div>
+      <button class="save-btn" onclick="saveNote()">Save</button>
+      <button class="cancel-btn" onclick="closeNoteModal()">Close</button>
     </div>
   </div>
 
@@ -123,16 +117,14 @@
     const managerId = localStorage.getItem("userId");
     let allEmployees = [];
     let editingGroupId = null;
-    let currentNoteTask = "";
+    let noteTargetId = null;
 
     if (!managerId) {
       alert("Session expired. Please log in again.");
       window.location.href = "Auth_page.html";
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      fetchGroups();
-    });
+    document.addEventListener("DOMContentLoaded", fetchGroups);
 
     async function fetchGroups() {
       try {
@@ -147,8 +139,6 @@
         const container = document.getElementById("groupContainer");
         container.innerHTML = "";
 
-        if (!Array.isArray(groups)) throw new Error("Tasks data error");
-
         groups.forEach(group => {
           const card = document.createElement("div");
           card.className = "employee-card";
@@ -162,9 +152,9 @@
             <h4>${group.name}</h4>
             <p>Status: <strong>${group.status || "Not Assigned"}</strong></p>
             <p>Members: ${memberNames.join(", ") || "None"}</p>
-            <button class="btn edit-btn" onclick='editGroup("${group._id}", "${group.name}", "${group.status}", ${JSON.stringify(group.members)})'>Edit</button>
-            <button class="btn delete-btn" onclick="deleteGroup('${group._id}')">Delete</button>
-            <button class="btn note-btn" onclick="openNote('${group.name}')">Note</button>
+            <button class="edit-btn" onclick='editGroup("${group._id}", "${group.name}", "${group.status}", ${JSON.stringify(group.members)})'>Edit</button>
+            <button class="note-btn" onclick='openNoteModal("${group._id}", "${group.note || ''}", "${group.completedDate || ''}")'>Note</button>
+            <button class="delete-btn" onclick="deleteGroup('${group._id}')">Delete</button>
           `;
 
           container.appendChild(card);
@@ -260,30 +250,36 @@
       document.getElementById("groupModal").style.display = "block";
     }
 
-    function openNote(taskName) {
-      currentNoteTask = taskName;
-      document.getElementById("taskNote").value = "";
-      document.getElementById("completionDate").value = "";
+    function openNoteModal(id, note = '', date = '') {
+      noteTargetId = id;
+      document.getElementById("noteContent").value = note;
+      document.getElementById("completionDate").value = date ? new Date(date).toISOString().substr(0, 10) : '';
       document.getElementById("noteModal").style.display = "block";
     }
 
     function closeNoteModal() {
-      currentNoteTask = "";
+      noteTargetId = null;
       document.getElementById("noteModal").style.display = "none";
     }
 
-    function saveNote() {
-      const note = document.getElementById("taskNote").value.trim();
-      const date = document.getElementById("completionDate").value;
+    async function saveNote() {
+      const note = document.getElementById("noteContent").value;
+      const completedDate = document.getElementById("completionDate").value;
 
-      if (!note || !date) {
-        alert("Please fill in both fields.");
-        return;
+      try {
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups/${noteTargetId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ note, completedDate })
+        });
+
+        if (!res.ok) throw new Error("Failed to save note");
+        closeNoteModal();
+        fetchGroups();
+      } catch (err) {
+        console.error("❌ Error saving note:", err);
+        alert("Could not save note.");
       }
-
-      console.log(`Note for ${currentNoteTask}:`, note, "Date:", date);
-      alert(`Note saved for ${currentNoteTask}`);
-      closeNoteModal();
     }
 
     function logout() {
