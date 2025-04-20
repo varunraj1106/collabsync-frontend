@@ -14,8 +14,8 @@ body {
 
 .container {
   background-color: #ffffff;
-  padding: 40px 50px;
-  width: 400px; /* reduced from 500px to 400px */
+  padding: 30px 40px;        /* reduced vertical and horizontal padding */
+  width: 380px;              /* slightly narrower */
   border-radius: 14px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
