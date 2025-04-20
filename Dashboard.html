@@ -47,6 +47,32 @@
     <div id="groupsContainer" class="row"></div>
   </div>
 
+  <!-- Note Modal -->
+  <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="noteModalLabel">Task Note</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="taskNote" class="form-label">Description</label>
+            <textarea class="form-control" id="taskNote" rows="3" placeholder="Add a short description (max 100 words)"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="completionDate" class="form-label">Completion Date</label>
+            <input type="date" class="form-control" id="completionDate" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" onclick="saveNote()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const userId = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
@@ -62,6 +88,8 @@
     ];
     const pendingStatuses = statuses.slice(0, 5); // First 5 are pending
     const completedStatus = "Done";
+
+    let currentTaskName = '';
 
     async function fetchGroups() {
       try {
@@ -87,6 +115,7 @@
               <h5>${group.name}</h5>
               <p>Status: ${group.status}</p>
               <p>Members: ${group.members.join(', ')}</p>
+              <button class="btn btn-outline-primary btn-sm mt-2" onclick="openNoteModal('${group.name}')">Note</button>
             </div>
           `;
           container.appendChild(card);
@@ -100,6 +129,28 @@
       }
     }
 
+    function openNoteModal(taskName) {
+      currentTaskName = taskName;
+      document.getElementById("taskNote").value = '';
+      document.getElementById("completionDate").value = '';
+      const modal = new bootstrap.Modal(document.getElementById('noteModal'));
+      modal.show();
+    }
+
+    function saveNote() {
+      const note = document.getElementById("taskNote").value.trim();
+      const date = document.getElementById("completionDate").value;
+
+      if (!note || !date) {
+        alert("Both description and date are required.");
+        return;
+      }
+
+      console.log(`Note for "${currentTaskName}":`, note, "Completed on:", date);
+      alert(`Note saved for "${currentTaskName}"`);
+      bootstrap.Modal.getInstance(document.getElementById('noteModal')).hide();
+    }
+
     function logout() {
       localStorage.clear();
       window.location.href = 'Auth_page.html';
@@ -107,5 +158,6 @@
 
     document.addEventListener('DOMContentLoaded', fetchGroups);
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
