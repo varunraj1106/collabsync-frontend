@@ -1,38 +1,30 @@
-/* Wide white-theme version of form.css */
+/* form.css - Light & Professional */
 
 body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(to bottom right, #121212, #1e1e1e);
+  background: #f2f3f5; /* light gray background */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #fff;
+  color: #333;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  animation: fadeIn 1s ease-in-out;
 }
 
 .container {
-  background-color: rgba(44, 44, 44, 0.95);
-  padding: 50px 60px;
-  width: 500px; /* Wider container */
+  background-color: #ffffff; /* white form background */
+  padding: 40px 50px;
+  width: 500px;
   border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(6px);
-  transition: transform 0.3s ease;
-}
-
-.container:hover {
-  transform: scale(1.01);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 h1 {
   text-align: center;
   margin-bottom: 25px;
-  color: #fff;
   font-size: 2.2rem;
-  letter-spacing: 1px;
+  color: #222;
 }
 
 form {
@@ -45,34 +37,33 @@ label {
   margin-bottom: 6px;
   font-weight: 600;
   font-size: 1rem;
-  color: #e0e0e0;
+  color: #333;
 }
 
 input,
 select {
   padding: 12px;
-  border: none;
+  border: 1px solid #ccc;
   border-radius: 8px;
   margin-bottom: 10px;
   font-size: 1rem;
-  background-color: #1e1e1e;
-  color: #fff;
-  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.08);
-  transition: box-shadow 0.3s, background-color 0.3s;
+  background-color: #f9f9f9;
+  color: #222;
+  transition: border 0.3s;
 }
 
 input:focus,
 select:focus {
   outline: none;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-  background-color: #2a2a2a;
+  border: 1px solid #007BFF;
+  background-color: #fff;
 }
 
 button {
   padding: 12px;
-  background: #fff;
-  color: #111;
-  border: none;
+  background: #ffffff;
+  color: #000000;
+  border: 2px solid #000;
   border-radius: 10px;
   font-size: 1.1rem;
   font-weight: bold;
@@ -83,17 +74,6 @@ button {
 
 button:hover {
   background: #f0f0f0;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 12px rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
