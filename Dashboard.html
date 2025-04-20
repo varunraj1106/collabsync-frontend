@@ -19,7 +19,6 @@
   </style>
 </head>
 <body>
-
   <div class="top-bar">
     <h3>Welcome, <span id="username"></span></h3>
     <div>
@@ -50,7 +49,7 @@
   <script>
     const userId = localStorage.getItem('userId');
     const username = localStorage.getItem('username');
-    document.getElementById('username').textContent = username ? username : '';
+    document.getElementById('username').textContent = username || '';
 
     const statuses = [
       "Requirement Gathering",
@@ -60,23 +59,23 @@
       "Testing Done",
       "Done"
     ];
-    const pendingStatuses = statuses.slice(0, 5); // First 5 are pending
+    const pendingStatuses = statuses.slice(0, 5);
     const completedStatus = "Done";
 
-    async function fetchGroups() {
+    async function fetchEmployeeGroups() {
       try {
-        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups?managerId=${userId}`);
-        const data = await res.json();
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups`);
+        const allGroups = await res.json();
 
-        if (!res.ok) throw new Error(data.message);
-
-        const container = document.getElementById('groupsContainer');
-        container.innerHTML = '';
+        const assignedGroups = allGroups.filter(group => group.members.includes(userId));
 
         let pendingCount = 0;
         let completedCount = 0;
 
-        data.forEach(group => {
+        const container = document.getElementById('groupsContainer');
+        container.innerHTML = '';
+
+        assignedGroups.forEach(group => {
           if (pendingStatuses.includes(group.status)) pendingCount++;
           if (group.status === completedStatus) completedCount++;
 
@@ -86,7 +85,7 @@
             <div class="project-card">
               <h5>${group.name}</h5>
               <p>Status: ${group.status}</p>
-              <p>Members: ${group.members.join(', ')}</p>
+              <p>Group ID: ${group._id}</p>
             </div>
           `;
           container.appendChild(card);
@@ -96,7 +95,7 @@
         document.getElementById('completedCount').textContent = completedCount;
 
       } catch (error) {
-        console.error('Error fetching groups:', error);
+        console.error('❌ Error fetching employee groups:', error);
       }
     }
 
@@ -105,7 +104,7 @@
       window.location.href = 'Auth_page.html';
     }
 
-    document.addEventListener('DOMContentLoaded', fetchGroups);
+    document.addEventListener('DOMContentLoaded', fetchEmployeeGroups);
   </script>
 </body>
 </html>
