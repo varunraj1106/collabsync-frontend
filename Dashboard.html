@@ -9,8 +9,8 @@
     body { background-color: #f5f7fa; }
     .top-bar {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 1rem 2rem; background-color: #2c3e50;
-      color: #fff;
+      padding: 1rem 2rem; background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .stats-box, .project-card {
       background-color: #fff; padding: 1rem; border-radius: 8px;
@@ -19,9 +19,12 @@
   </style>
 </head>
 <body>
+
   <div class="top-bar">
-    <h4><strong>CollabSync</strong> | <span id="empIdDisplay"></span> (<span id="nameDisplay"></span>)</h4>
-    <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+    <h3>Welcome, <span id="username"></span></h3>
+    <div>
+      <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+    </div>
   </div>
 
   <div class="container mt-4">
@@ -45,52 +48,35 @@
   </div>
 
   <script>
-    const empId = localStorage.getItem('userId'); // e.g., "EMPF101"
-    document.getElementById('empIdDisplay').textContent = empId || '';
+    const userId = localStorage.getItem('userId');
+    const username = localStorage.getItem('username');
+    document.getElementById('username').textContent = username ? username : '';
 
     const statuses = [
-      "Test Cases",
-      "Test Data",
-      "Development",
-      "UAT SignOff",
-      "Prod SignOff",
+      "Requirement Gathering",
+      "In Dev",
+      "Dev Completed",
+      "In Testing",
+      "Testing Done",
       "Done"
     ];
-    const pendingStatuses = statuses.slice(0, 5);
+    const pendingStatuses = statuses.slice(0, 5); // First 5 are pending
     const completedStatus = "Done";
 
-    async function fetchGroupsAndUserDetails() {
-      if (!empId) {
-        console.error('No empId found in localStorage');
-        return;
-      }
-
+    async function fetchGroups() {
       try {
-        // 1. Fetch user name by empId
-        const userRes = await fetch(`https://collabsync-backend-i376.onrender.com/api/users?emp_id=${empId}`);
-        const userData = await userRes.json();
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups?managerId=${userId}`);
+        const data = await res.json();
 
-        if (!userRes.ok) {
-          throw new Error(userData.message || 'Failed to fetch user');
-        }
+        if (!res.ok) throw new Error(data.message);
 
-        const username = userData.name || 'Unknown';
-        document.getElementById('nameDisplay').textContent = username;
-
-        // 2. Fetch all groups
-        const groupRes = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups`);
-        const allGroups = await groupRes.json();
-
-        // 3. Filter groups where employee is a member
-        const myGroups = allGroups.filter(group => group.members.includes(empId));
-
-        // 4. Display groups
-        let pendingCount = 0;
-        let completedCount = 0;
         const container = document.getElementById('groupsContainer');
         container.innerHTML = '';
 
-        myGroups.forEach(group => {
+        let pendingCount = 0;
+        let completedCount = 0;
+
+        data.forEach(group => {
           if (pendingStatuses.includes(group.status)) pendingCount++;
           if (group.status === completedStatus) completedCount++;
 
@@ -100,7 +86,7 @@
             <div class="project-card">
               <h5>${group.name}</h5>
               <p>Status: ${group.status}</p>
-              <p>Group ID: ${group._id}</p>
+              <p>Members: ${group.members.join(', ')}</p>
             </div>
           `;
           container.appendChild(card);
@@ -110,7 +96,7 @@
         document.getElementById('completedCount').textContent = completedCount;
 
       } catch (error) {
-        console.error("❌ Error loading dashboard data:", error);
+        console.error('Error fetching groups:', error);
       }
     }
 
@@ -119,7 +105,7 @@
       window.location.href = 'Auth_page.html';
     }
 
-    document.addEventListener('DOMContentLoaded', fetchGroupsAndUserDetails);
+    document.addEventListener('DOMContentLoaded', fetchGroups);
   </script>
 </body>
 </html>
