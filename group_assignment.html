@@ -19,25 +19,23 @@
     }
     .modal-content {
       background-color: #fff;
-      margin: 10% auto;
+      margin: 8% auto;
       padding: 20px;
       border-radius: 10px;
       width: 90%;
       max-width: 400px;
     }
-    .modal-content input, .modal-content select {
+    .modal-content input, .modal-content select, .modal-content textarea {
       width: 100%;
       padding: 10px;
       margin: 10px 0;
-    }
-    .modal-content button {
-      margin-right: 10px;
     }
     .employee-card {
       border: 1px solid #ccc;
       padding: 16px;
       margin-bottom: 12px;
       border-radius: 8px;
+      position: relative;
     }
     .btn {
       padding: 8px 14px;
@@ -66,6 +64,14 @@
       border: none;
       border-radius: 5px;
     }
+    .note-btn {
+      background-color: #f39c12;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      width: 100%;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -80,7 +86,7 @@
     <div id="groupContainer"></div>
   </div>
 
-  <!-- Modal -->
+  <!-- Group Modal -->
   <div id="groupModal" class="modal">
     <div class="modal-content">
       <h3 id="modalTitle">Create a New Task</h3>
@@ -100,10 +106,24 @@
     </div>
   </div>
 
+  <!-- Note Modal -->
+  <div id="noteModal" class="modal">
+    <div class="modal-content">
+      <h3>Task Note</h3>
+      <textarea id="taskNote" rows="3" placeholder="Add a short description (max 100 words)"></textarea>
+      <input type="date" id="completionDate" />
+      <div class="d-flex justify-content-end mt-2">
+        <button class="cancel-btn" onclick="closeNoteModal()">Close</button>
+        <button class="save-btn ms-2" onclick="saveNote()">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const managerId = localStorage.getItem("userId");
     let allEmployees = [];
     let editingGroupId = null;
+    let currentNoteTask = "";
 
     if (!managerId) {
       alert("Session expired. Please log in again.");
@@ -144,6 +164,7 @@
             <p>Members: ${memberNames.join(", ") || "None"}</p>
             <button class="btn edit-btn" onclick='editGroup("${group._id}", "${group.name}", "${group.status}", ${JSON.stringify(group.members)})'>Edit</button>
             <button class="btn delete-btn" onclick="deleteGroup('${group._id}')">Delete</button>
+            <button class="btn note-btn" onclick="openNote('${group.name}')">Note</button>
           `;
 
           container.appendChild(card);
@@ -239,6 +260,32 @@
       document.getElementById("groupModal").style.display = "block";
     }
 
+    function openNote(taskName) {
+      currentNoteTask = taskName;
+      document.getElementById("taskNote").value = "";
+      document.getElementById("completionDate").value = "";
+      document.getElementById("noteModal").style.display = "block";
+    }
+
+    function closeNoteModal() {
+      currentNoteTask = "";
+      document.getElementById("noteModal").style.display = "none";
+    }
+
+    function saveNote() {
+      const note = document.getElementById("taskNote").value.trim();
+      const date = document.getElementById("completionDate").value;
+
+      if (!note || !date) {
+        alert("Please fill in both fields.");
+        return;
+      }
+
+      console.log(`Note for ${currentNoteTask}:`, note, "Date:", date);
+      alert(`Note saved for ${currentNoteTask}`);
+      closeNoteModal();
+    }
+
     function logout() {
       localStorage.clear();
       sessionStorage.clear();
@@ -247,7 +294,3 @@
   </script>
 </body>
 </html>
-
-
-
-
