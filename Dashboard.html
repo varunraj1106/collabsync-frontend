@@ -4,15 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CollabSync | Dashboard</title>
-  <link rel="stylesheet" href="styles/css/managerdash1.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <style>
     body { background-color: #f5f7fa; }
     .top-bar {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 1rem 2rem; background-color: #2c3e50;
+      padding: 1rem 2rem; background-color: #2c3e50; color: white;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      color: white;
-      font-weight: bold;
     }
     .stats-box, .project-card {
       background-color: #fff; padding: 1rem; border-radius: 8px;
@@ -21,9 +19,10 @@
   </style>
 </head>
 <body>
+
   <div class="top-bar">
-    <div>CollabSync</div>
-    <button class="btn btn-danger" onclick="logout()">Logout</button>
+    <div><strong>CollabSync</strong> | <span id="username"></span></div>
+    <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
   </div>
 
   <div class="container mt-4">
@@ -47,41 +46,43 @@
   </div>
 
   <script>
-    const userId = localStorage.getItem("userId") || sessionStorage.getItem("userId");
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    const empId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+    const username = localStorage.getItem('username') || 'User';
 
-    if (!userId) {
-      alert("Session expired. Please login again.");
+    console.log("🔐 Logged in as:", empId);
+
+    if (!empId) {
+      alert("Session expired or not found. Please log in again.");
       window.location.href = "Auth_page.html";
     }
 
-    console.log("🔐 Logged in as:", userId);
-
     const statuses = [
-      "Test Cases", "Test Data", "Development",
-      "UAT SignOff", "Prod SignOff", "Done"
+      "Test Cases",
+      "Test Data",
+      "Development",
+      "UAT SignOff",
+      "Prod SignOff",
+      "Done"
     ];
-    const pendingStatuses = statuses.slice(0, 5);
+    const pendingStatuses = statuses.slice(0, 5); // First 5 are pending
     const completedStatus = "Done";
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const nameSpan = document.getElementById("username");
+      if (nameSpan) nameSpan.textContent = username + " (" + empId + ")";
+      fetchEmployeeGroups();
+    });
 
     async function fetchEmployeeGroups() {
       try {
-        // Step 1: Fetch current user's employee details
-        const userRes = await fetch(`https://collabsync-backend-i376.onrender.com/api/users/${userId}`);
-        const userData = await userRes.json();
-
-        if (!userRes.ok || !userData.emp_id) throw new Error("Invalid user data");
-
-        const empId = userData.emp_id; // e.g., EMPF101
-        document.getElementById("username").textContent = userData.name || empId;
-
-        // Step 2: Fetch all groups and filter by membership
-        const groupRes = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups`);
-        const allGroups = await groupRes.json();
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups`);
+        const allGroups = await res.json();
 
         const assignedGroups = allGroups.filter(group => group.members.includes(empId));
 
-        let pendingCount = 0, completedCount = 0;
+        let pendingCount = 0;
+        let completedCount = 0;
+
         const container = document.getElementById('groupsContainer');
         container.innerHTML = '';
 
@@ -104,23 +105,17 @@
         document.getElementById('pendingCount').textContent = pendingCount;
         document.getElementById('completedCount').textContent = completedCount;
 
-      } catch (err) {
-        console.error("❌ Error:", err);
-        alert("Failed to load groups. Please try again.");
+      } catch (error) {
+        console.error('❌ Error fetching employee groups:', error);
       }
     }
 
     function logout() {
       localStorage.clear();
       sessionStorage.clear();
-      window.location.href = "Auth_page.html";
+      window.location.href = 'Auth_page.html';
     }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const username = localStorage.getItem("username") || "";
-      document.getElementById("username").textContent = username;
-      fetchEmployeeGroups();
-    });
   </script>
+
 </body>
 </html>
