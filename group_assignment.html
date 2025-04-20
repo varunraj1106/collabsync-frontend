@@ -42,9 +42,24 @@
     .logout-btn:hover {
       background-color: #c0392b;
     }
-
     .container {
       margin-top: 30px;
+    }
+
+    .create-btn {
+      background-color: #27ae60;
+      color: white;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: background-color 0.2s ease-in-out;
+    }
+    .create-btn:hover {
+      background-color: #1f8c4d;
     }
 
     .modal {
@@ -114,7 +129,7 @@
 
   <div class="container">
     <h2>Group Assignment</h2>
-    <button class="save-btn" onclick="openModal()">+ Create Tasks</button>
+    <button class="create-btn" onclick="openModal()">+ Create Tasks</button>
     <div id="groupContainer"></div>
   </div>
 
@@ -326,4 +341,5 @@
   </script>
 </body>
 </html>
+
 
