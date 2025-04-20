@@ -4,15 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>CollabSync | Dashboard</title>
+  <link rel="stylesheet" href="styles/css/managerdash1.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <style>
     body { background-color: #f5f7fa; }
     .top-bar {
       display: flex; justify-content: space-between; align-items: center;
       padding: 1rem 2rem; background-color: #2c3e50;
-      color: white; border-radius: 10px; margin: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      color: white;
     }
-    .top-bar h3 { font-weight: bold; margin: 0; }
     .stats-box, .project-card {
       background-color: #fff; padding: 1rem; border-radius: 8px;
       box-shadow: 0 0 8px rgba(0,0,0,0.05); margin-bottom: 1rem;
@@ -23,7 +24,7 @@
 
   <div class="top-bar">
     <h3>CollabSync</h3>
-    <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
+    <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
   </div>
 
   <div class="container mt-4">
@@ -47,8 +48,10 @@
   </div>
 
   <script>
-    const userId = localStorage.getItem("userId");
-    const username = localStorage.getItem("username");
+    const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+    const username = localStorage.getItem('username') || sessionStorage.getItem('username');
+    console.log("👤 Logged in as:", userId);
+
     if (!userId) {
       alert("Session expired. Please log in again.");
       window.location.href = "Auth_page.html";
@@ -62,30 +65,30 @@
       "Prod SignOff",
       "Done"
     ];
-    const pendingStatuses = statuses.slice(0, 5);
+
+    const pendingStatuses = statuses.slice(0, 5); // All except Done
     const completedStatus = "Done";
 
     async function fetchEmployeeGroups() {
       try {
-        const res = await fetch("https://collabsync-backend-i376.onrender.com/api/groups");
+        const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups`);
         const allGroups = await res.json();
 
-        const assignedGroups = allGroups.filter(group =>
-          Array.isArray(group.members) && group.members.includes(userId)
-        );
+        // Filter groups where userId is in members list
+        const assignedGroups = allGroups.filter(group => group.members.includes(userId));
 
         let pendingCount = 0;
         let completedCount = 0;
 
-        const container = document.getElementById("groupsContainer");
-        container.innerHTML = "";
+        const container = document.getElementById('groupsContainer');
+        container.innerHTML = '';
 
         assignedGroups.forEach(group => {
           if (pendingStatuses.includes(group.status)) pendingCount++;
           if (group.status === completedStatus) completedCount++;
 
-          const card = document.createElement("div");
-          card.className = "col-md-4";
+          const card = document.createElement('div');
+          card.className = 'col-md-4';
           card.innerHTML = `
             <div class="project-card">
               <h5>${group.name}</h5>
@@ -96,21 +99,22 @@
           container.appendChild(card);
         });
 
-        document.getElementById("pendingCount").textContent = pendingCount;
-        document.getElementById("completedCount").textContent = completedCount;
+        document.getElementById('pendingCount').textContent = pendingCount;
+        document.getElementById('completedCount').textContent = completedCount;
+
       } catch (error) {
-        console.error("❌ Error fetching employee groups:", error);
-        alert("Could not load your assigned tasks.");
+        console.error('❌ Error fetching employee groups:', error);
+        alert('Failed to fetch group data.');
       }
     }
 
     function logout() {
       localStorage.clear();
-      window.location.href = "Auth_page.html";
+      sessionStorage.clear();
+      window.location.href = 'Auth_page.html';
     }
 
-    document.addEventListener("DOMContentLoaded", fetchEmployeeGroups);
+    document.addEventListener('DOMContentLoaded', fetchEmployeeGroups);
   </script>
 </body>
 </html>
-
