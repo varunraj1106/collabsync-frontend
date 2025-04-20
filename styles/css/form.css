@@ -13,9 +13,9 @@ body {
 }
 
 .container {
-  background-color: #ffffff; /* white form background */
+  background-color: #ffffff;
   padding: 40px 50px;
-  width: 500px;
+  width: 400px; /* reduced from 500px to 400px */
   border-radius: 14px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
