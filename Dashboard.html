@@ -67,7 +67,13 @@
         const res = await fetch(`https://collabsync-backend-i376.onrender.com/api/groups`);
         const allGroups = await res.json();
 
-        const assignedGroups = allGroups.filter(group => group.members.includes(userId));
+        if (!Array.isArray(allGroups)) {
+          throw new Error("Groups response is not an array");
+        }
+
+        const assignedGroups = allGroups.filter(group =>
+          Array.isArray(group.members) && group.members.includes(userId)
+        );
 
         let pendingCount = 0;
         let completedCount = 0;
@@ -84,8 +90,8 @@
           card.innerHTML = `
             <div class="project-card">
               <h5>${group.name}</h5>
-              <p>Status: ${group.status}</p>
-              <p>Group ID: ${group._id}</p>
+              <p>Status: <strong>${group.status}</strong></p>
+              <p><small>Group ID: ${group._id}</small></p>
             </div>
           `;
           container.appendChild(card);
@@ -96,11 +102,15 @@
 
       } catch (error) {
         console.error('❌ Error fetching employee groups:', error);
+        document.getElementById('groupsContainer').innerHTML = `
+          <div class="col-12 text-danger">Could not load your groups. Please try again.</div>
+        `;
       }
     }
 
     function logout() {
       localStorage.clear();
+      sessionStorage.clear();
       window.location.href = 'Auth_page.html';
     }
 
